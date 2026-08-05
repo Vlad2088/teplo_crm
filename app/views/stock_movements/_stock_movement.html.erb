@@ -1,0 +1,18 @@
+<div id="<%= dom_id stock_movement %>" class="w-full sm:w-auto my-5 space-y-5">
+  <div>
+    <strong class="block font-medium mb-1">Product:</strong>
+    <%= stock_movement.product_id %>
+  </div>
+  <div>
+    <strong class="block font-medium mb-1">Quantity change:</strong>
+    <%= stock_movement.quantity_change %>
+  </div>
+  <div>
+    <strong class="block font-medium mb-1">Movement type:</strong>
+    <%= stock_movement.movement_type %>
+  </div>
+  <div>
+    <strong class="block font-medium mb-1">Order:</strong>
+    <%= stock_movement.order_id %>
+  </div>
+</div>

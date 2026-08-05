@@ -1,0 +1,37 @@
+<%= form_with(model: stock_movement, class: "contents") do |form| %>
+  <% if stock_movement.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
+      <h2><%= pluralize(stock_movement.errors.count, "error") %> prohibited this stock_movement from being saved:</h2>
+
+      <ul class="list-disc ml-6">
+        <% stock_movement.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="my-5">
+    <%= form.label :product_id %>
+    <%= form.text_field :product_id, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": stock_movement.errors[:product_id].none?, "border-red-400 focus:outline-red-600": stock_movement.errors[:product_id].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :quantity_change %>
+    <%= form.number_field :quantity_change, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": stock_movement.errors[:quantity_change].none?, "border-red-400 focus:outline-red-600": stock_movement.errors[:quantity_change].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :movement_type %>
+    <%= form.select :movement_type, StockMovement.movement_types.keys.map { |m| [m.humanize, m] }, {}, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": stock_movement.errors[:movement_type].none?, "border-red-400 focus:outline-red-600": stock_movement.errors[:movement_type].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :order_id %>
+    <%= form.text_field :order_id, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": stock_movement.errors[:order_id].none?, "border-red-400 focus:outline-red-600": stock_movement.errors[:order_id].any?}] %>
+  </div>
+
+  <div class="inline">
+    <%= form.submit class: "w-full sm:w-auto rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+  </div>
+<% end %>
