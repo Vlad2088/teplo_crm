@@ -1,14 +1,19 @@
-<div id="<%= dom_id service %>" class="w-full sm:w-auto my-5 space-y-5">
-  <div>
-    <strong class="block font-medium mb-1">Name:</strong>
-    <%= service.name %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">Price per sqm:</strong>
-    <%= service.price_per_sqm %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">Description:</strong>
-    <%= service.description %>
-  </div>
-</div>
+<tr id="<%= dom_id service %>" class="hover:bg-gray-50 transition-colors">
+  <td class="px-6 py-3.5 whitespace-nowrap font-medium text-gray-900">
+    <%= link_to service.name, service, class: "text-orange-600 hover:text-orange-700 hover:underline" %>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-600"><%= format_currency(service.price_per_sqm) %></td>
+  <td class="px-6 py-3.5 text-gray-600 max-w-xs truncate"><%= service.description.presence || "—" %></td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-500 text-sm">
+    <%= l(service.created_at, format: :short) if service.created_at %>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-right">
+    <div class="flex justify-end space-x-2">
+      <%= link_to "Просмотр", service, class: "px-2.5 py-1.5 text-xs font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition" %>
+      <%= link_to "Изменить", edit_service_path(service), class: "px-2.5 py-1.5 text-xs font-medium rounded bg-orange-50 text-orange-600 hover:bg-orange-100 transition" %>
+      <%= button_to "Удалить", service, method: :delete,
+          class: "px-2.5 py-1.5 text-xs font-medium rounded bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer",
+          data: { turbo_confirm: "Удалить услугу «#{service.name}»?" } %>
+    </div>
+  </td>
+</tr>

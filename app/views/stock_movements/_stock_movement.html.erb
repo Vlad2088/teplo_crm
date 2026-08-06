@@ -1,18 +1,20 @@
-<div id="<%= dom_id stock_movement %>" class="w-full sm:w-auto my-5 space-y-5">
-  <div>
-    <strong class="block font-medium mb-1">Product:</strong>
-    <%= stock_movement.product_id %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">Quantity change:</strong>
-    <%= stock_movement.quantity_change %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">Movement type:</strong>
-    <%= stock_movement.movement_type %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">Order:</strong>
-    <%= stock_movement.order_id %>
-  </div>
-</div>
+<tr id="<%= dom_id stock_movement %>" class="hover:bg-gray-50 transition-colors">
+  <td class="px-6 py-3.5 whitespace-nowrap"><%= movement_type_badge(stock_movement.movement_type) %></td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-600"><%= stock_movement.product&.name || stock_movement.product_id %></td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-600"><%= stock_movement.quantity_change %></td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-600">
+    <%= link_to "Заказ ##{stock_movement.order_id}", stock_movement.order, class: "text-orange-600 hover:text-orange-700 hover:underline" %>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-500 text-sm">
+    <%= l(stock_movement.created_at, format: :short) if stock_movement.created_at %>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-right">
+    <div class="flex justify-end space-x-2">
+      <%= link_to "Просмотр", stock_movement, class: "px-2.5 py-1.5 text-xs font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition" %>
+      <%= link_to "Изменить", edit_stock_movement_path(stock_movement), class: "px-2.5 py-1.5 text-xs font-medium rounded bg-orange-50 text-orange-600 hover:bg-orange-100 transition" %>
+      <%= button_to "Удалить", stock_movement, method: :delete,
+          class: "px-2.5 py-1.5 text-xs font-medium rounded bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer",
+          data: { turbo_confirm: "Удалить движение склада?" } %>
+    </div>
+  </td>
+</tr>
