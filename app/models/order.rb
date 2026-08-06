@@ -12,4 +12,10 @@ class Order < ApplicationRecord
     installation: 5, act_signed: 6,
     installation_paid: 7, completed: 8, cancelled: 9
   }
+
+  validates :client, presence: true
+  validates :user, presence: true
+  validates :status, presence: true
+  validates :address, presence: true
+  validates :area_sqm, numericality: { greater_than: 0 }, allow_nil: true
 end

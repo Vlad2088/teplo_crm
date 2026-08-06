@@ -1,29 +1,39 @@
-<% content_for :title, "Clients" %>
+<% content_for :title, "Клиенты" %>
 
 <div class="w-full">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
-  <% end %>
-
-  <div class="flex justify-between items-center">
-    <h1 class="font-bold text-4xl">Clients</h1>
-    <%= link_to "New client", new_client_path, class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Клиенты</h1>
+      <p class="text-sm text-gray-500 mt-1"><%= @clients.count %> записей</p>
+    </div>
+    <%= link_to "Добавить клиента", new_client_path, class: "rounded-lg px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition shadow-sm" %>
   </div>
 
-  <div id="clients" class="min-w-full divide-y divide-gray-200 space-y-5">
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
     <% if @clients.any? %>
-      <% @clients.each do |client| %>
-        <div class="flex flex-col sm:flex-row justify-between items-center pb-5 sm:pb-0">
-          <%= render client %>
-          <div class="w-full sm:w-auto flex flex-col sm:flex-row space-x-2 space-y-2">
-            <%= link_to "Show", client, class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-            <%= link_to "Edit", edit_client_path(client), class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-            <%= button_to "Destroy", client, method: :delete, class: "w-full sm:w-auto rounded-md px-3.5 py-2.5 text-white bg-red-600 hover:bg-red-500 font-medium cursor-pointer", data: { turbo_confirm: "Are you sure?" } %>
-          </div>
-        </div>
-      <% end %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Имя</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Телефон</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Создан</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            <%= render @clients %>
+          </tbody>
+        </table>
+      </div>
     <% else %>
-      <p class="text-center my-10">No clients found.</p>
+      <div class="p-12 text-center">
+        <p class="text-gray-400 text-lg mb-2">Нет клиентов</p>
+        <p class="text-gray-400 text-sm">Добавьте первого клиента, чтобы начать работу</p>
+        <%= link_to "Добавить клиента", new_client_path, class: "mt-4 inline-block rounded-md px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium" %>
+      </div>
     <% end %>
   </div>
 </div>

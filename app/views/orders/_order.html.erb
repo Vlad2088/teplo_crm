@@ -1,30 +1,23 @@
-<div id="<%= dom_id order %>" class="w-full sm:w-auto my-5 space-y-5">
-  <div>
-    <strong class="block font-medium mb-1">Client:</strong>
-    <%= order.client_id %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">Status:</strong>
-    <%= order.status %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">Address:</strong>
-    <%= order.address %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">Area sqm:</strong>
-    <%= order.area_sqm %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">Measurement date:</strong>
-    <%= order.measurement_date %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">Notes:</strong>
-    <%= order.notes %>
-  </div>
-  <div>
-    <strong class="block font-medium mb-1">User:</strong>
-    <%= order.user_id %>
-  </div>
-</div>
+<tr id="<%= dom_id order %>" class="hover:bg-gray-50 transition-colors">
+  <td class="px-6 py-3.5 whitespace-nowrap">
+    <div class="flex items-center space-x-2">
+      <%= link_to "Заказ ##{order.id}", order, class: "text-orange-600 hover:text-orange-700 hover:underline font-medium" %>
+      <%= order_status_badge(order.status) %>
+    </div>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-600"><%= order.client&.name || order.client_id %></td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-600 max-w-xs truncate" title="<%= order.address %>"><%= order.address %></td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-600"><%= format_area(order.area_sqm) %></td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-500 text-sm">
+    <%= l(order.created_at, format: :short) if order.created_at %>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-right">
+    <div class="flex justify-end space-x-2">
+      <%= link_to "Просмотр", order, class: "px-2.5 py-1.5 text-xs font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition" %>
+      <%= link_to "Изменить", edit_order_path(order), class: "px-2.5 py-1.5 text-xs font-medium rounded bg-orange-50 text-orange-600 hover:bg-orange-100 transition" %>
+      <%= button_to "Удалить", order, method: :delete,
+          class: "px-2.5 py-1.5 text-xs font-medium rounded bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer",
+          data: { turbo_confirm: "Удалить заказ ##{order.id}?" } %>
+    </div>
+  </td>
+</tr>

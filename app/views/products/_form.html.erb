@@ -1,9 +1,8 @@
-<%= form_with(model: product, class: "contents") do |form| %>
+<%= form_with(model: product) do |form| %>
   <% if product.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
-      <h2><%= pluralize(product.errors.count, "error") %> prohibited this product from being saved:</h2>
-
-      <ul class="list-disc ml-6">
+    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+      <h3 class="text-red-800 font-semibold mb-2"><%= pluralize(product.errors.count, "ошибка", "ошибки", "ошибок") %>:</h3>
+      <ul class="list-disc ml-6 text-red-700 text-sm">
         <% product.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -11,47 +10,66 @@
     </div>
   <% end %>
 
-  <div class="my-5">
-    <%= form.label :name %>
-    <%= form.text_field :name, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": product.errors[:name].none?, "border-red-400 focus:outline-red-600": product.errors[:name].any?}] %>
-  </div>
+  <%= form_section "Основная информация" do %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <%= field_wrapper form, :name, "Название *" do %>
+        <%= form.text_field :name,
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+            placeholder: "Тёплый пол XL Pipe 150 Вт" %>
+      <% end %>
 
-  <div class="my-5">
-    <%= form.label :sku %>
-    <%= form.text_field :sku, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": product.errors[:sku].none?, "border-red-400 focus:outline-red-600": product.errors[:sku].any?}] %>
-  </div>
+      <%= field_wrapper form, :sku, "Артикул *" do %>
+        <%= form.text_field :sku,
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+            placeholder: "XLP-150-10" %>
+      <% end %>
 
-  <div class="my-5">
-    <%= form.label :category %>
-    <%= form.select :category, Product.categories.keys.map { |c| [c.humanize, c] }, {}, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": product.errors[:category].none?, "border-red-400 focus:outline-red-600": product.errors[:category].any?}] %>
-  </div>
+      <%= field_wrapper form, :category, "Категория *" do %>
+        <%= form.select :category,
+            { "Тёплый пол" => "warm_floor", "Терморегулятор" => "thermostat", "Подложка" => "underlay", "Прочее" => "other" },
+            { include_blank: "Выберите категорию..." },
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+      <% end %>
 
-  <div class="my-5">
-    <%= form.label :brand %>
-    <%= form.select :brand, Product.brands.keys.map { |b| [b.humanize, b] }, {}, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": product.errors[:brand].none?, "border-red-400 focus:outline-red-600": product.errors[:brand].any?}] %>
-  </div>
+      <%= field_wrapper form, :brand, "Бренд *" do %>
+        <%= form.select :brand,
+            { "Tesla" => "tesla", "XL Pipe" => "xl_pipe", "Другое" => "other_brand" },
+            { include_blank: "Выберите бренд..." },
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+      <% end %>
 
-  <div class="my-5">
-    <%= form.label :unit %>
-    <%= form.text_field :unit, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": product.errors[:unit].none?, "border-red-400 focus:outline-red-600": product.errors[:unit].any?}] %>
-  </div>
+      <%= field_wrapper form, :unit, "Единица измерения *" do %>
+        <%= form.text_field :unit,
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+            placeholder: "м², шт, рулон" %>
+      <% end %>
 
-  <div class="my-5">
-    <%= form.label :purchase_price %>
-    <%= form.text_field :purchase_price, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": product.errors[:purchase_price].none?, "border-red-400 focus:outline-red-600": product.errors[:purchase_price].any?}] %>
-  </div>
+      <%= field_wrapper form, :stock_quantity, "Количество на складе" do %>
+        <%= form.number_field :stock_quantity, step: 1,
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+            placeholder: "0" %>
+      <% end %>
+    </div>
+  <% end %>
 
-  <div class="my-5">
-    <%= form.label :sale_price %>
-    <%= form.text_field :sale_price, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": product.errors[:sale_price].none?, "border-red-400 focus:outline-red-600": product.errors[:sale_price].any?}] %>
-  </div>
+  <%= form_section "Цены" do %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <%= field_wrapper form, :sale_price, "Цена продажи *" do %>
+        <%= form.number_field :sale_price, step: 0.01,
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+            placeholder: "1250.00" %>
+      <% end %>
 
-  <div class="my-5">
-    <%= form.label :stock_quantity %>
-    <%= form.number_field :stock_quantity, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": product.errors[:stock_quantity].none?, "border-red-400 focus:outline-red-600": product.errors[:stock_quantity].any?}] %>
-  </div>
+      <%= field_wrapper form, :purchase_price, "Закупочная цена" do %>
+        <%= form.number_field :purchase_price, step: 0.01,
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+            placeholder: "950.00" %>
+      <% end %>
+    </div>
+  <% end %>
 
-  <div class="inline">
-    <%= form.submit class: "w-full sm:w-auto rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+  <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100">
+    <%= link_to "Отмена", products_path, class: "px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition" %>
+    <%= form.submit class: "px-6 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition cursor-pointer shadow-sm" %>
   </div>
 <% end %>
