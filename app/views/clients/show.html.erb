@@ -1,15 +1,55 @@
-<% content_for :title, "Showing client" %>
+<% content_for :title, "Клиент «#{@client.name}»" %>
 
-<div class="md:w-2/3 w-full">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
-  <% end %>
+<div class="w-full">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Клиент</h1>
+      <p class="text-sm text-gray-500 mt-1"><%= @client.name %></p>
+    </div>
+    <div class="flex space-x-2">
+      <%= link_to "Изменить", edit_client_path(@client), class: "rounded-lg px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition shadow-sm" %>
+      <%= button_to "Удалить", @client, method: :delete, class: "rounded-lg px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition cursor-pointer", data: { turbo_confirm: "Удалить клиента «#{@client.name}»?" } %>
+    </div>
+  </div>
 
-  <h1 class="font-bold text-4xl">Showing client</h1>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <dl class="divide-y divide-gray-100">
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Имя / Название</dt>
+        <dd class="text-sm text-gray-900 font-medium"><%= @client.name %></dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Тип</dt>
+        <dd class="text-sm text-gray-900"><%= client_type_badge(@client.client_type) %></dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Телефон</dt>
+        <dd class="text-sm text-gray-900"><%= @client.phone %></dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Email</dt>
+        <dd class="text-sm text-gray-900"><%= @client.email.presence || "—" %></dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">ИНН</dt>
+        <dd class="text-sm text-gray-900"><%= @client.inn.presence || "—" %></dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">КПП</dt>
+        <dd class="text-sm text-gray-900"><%= @client.kpp.presence || "—" %></dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Адрес</dt>
+        <dd class="text-sm text-gray-900"><%= @client.address.presence || "—" %></dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Создан</dt>
+        <dd class="text-sm text-gray-900"><%= l(@client.created_at, format: :long) if @client.created_at %></dd>
+      </div>
+    </dl>
+  </div>
 
-  <%= render @client %>
-
-  <%= link_to "Edit this client", edit_client_path(@client), class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-  <%= link_to "Back to clients", clients_path, class: "w-full sm:w-auto text-center mt-2 sm:mt-0 sm:ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-  <%= button_to "Destroy this client", @client, method: :delete, form_class: "sm:inline-block mt-2 sm:mt-0 sm:ml-2", class: "w-full rounded-md px-3.5 py-2.5 text-white bg-red-600 hover:bg-red-500 font-medium cursor-pointer", data: { turbo_confirm: "Are you sure?" } %>
+  <div class="mt-6">
+    <%= link_to "Назад к клиентам", clients_path, class: "rounded-lg px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition" %>
+  </div>
 </div>

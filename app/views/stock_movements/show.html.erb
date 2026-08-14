@@ -1,15 +1,39 @@
-<% content_for :title, "Showing stock movement" %>
+<% content_for :title, "Движение по складу ##{@stock_movement.id}" %>
 
-<div class="md:w-2/3 w-full">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
-  <% end %>
+<div class="w-full">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Движение по складу</h1>
+      <p class="text-sm text-gray-500 mt-1">Запись #<%= @stock_movement.id %></p>
+    </div>
+    <div class="flex space-x-2">
+      <%= link_to "Изменить", edit_stock_movement_path(@stock_movement), class: "rounded-lg px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition shadow-sm" %>
+      <%= button_to "Удалить", @stock_movement, method: :delete, class: "rounded-lg px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition cursor-pointer", data: { turbo_confirm: "Удалить движение по складу?" } %>
+    </div>
+  </div>
 
-  <h1 class="font-bold text-4xl">Showing stock movement</h1>
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <dl class="divide-y divide-gray-100">
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Тип</dt>
+        <dd class="text-sm text-gray-900"><%= movement_type_badge(@stock_movement.movement_type) %></dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Товар</dt>
+        <dd class="text-sm text-gray-900"><%= link_to @stock_movement.product.name, @stock_movement.product, class: "text-orange-600 hover:text-orange-700 hover:underline" %></dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Количество</dt>
+        <dd class="text-sm text-gray-900"><%= @stock_movement.quantity_change %></dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Создано</dt>
+        <dd class="text-sm text-gray-900"><%= l(@stock_movement.created_at, format: :long) if @stock_movement.created_at %></dd>
+      </div>
+    </dl>
+  </div>
 
-  <%= render @stock_movement %>
-
-  <%= link_to "Edit this stock movement", edit_stock_movement_path(@stock_movement), class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-  <%= link_to "Back to stock movements", stock_movements_path, class: "w-full sm:w-auto text-center mt-2 sm:mt-0 sm:ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-  <%= button_to "Destroy this stock movement", @stock_movement, method: :delete, form_class: "sm:inline-block mt-2 sm:mt-0 sm:ml-2", class: "w-full rounded-md px-3.5 py-2.5 text-white bg-red-600 hover:bg-red-500 font-medium cursor-pointer", data: { turbo_confirm: "Are you sure?" } %>
+  <div class="mt-6">
+    <%= link_to "Назад к складу", stock_movements_path, class: "rounded-lg px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition" %>
+  </div>
 </div>
