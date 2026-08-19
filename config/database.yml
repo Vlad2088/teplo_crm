@@ -17,7 +17,7 @@ default: &default
   encoding: unicode
 
   username: postgres
-  password: 10021993
+  password: <%= ENV["TEPLO_CRM_DATABASE_PASSWORD"] %>
   host: localhost
   
   # For details on connection pooling, see Rails configuration guide
