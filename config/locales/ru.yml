@@ -91,3 +91,12 @@ ru:
       time_only: "%H:%M"
     am: "утра"
     pm: "вечера"
+  genitive:
+    client: "клиента"
+    order: "заказ"
+    product: "товар"
+    service: "услугу"
+    payment: "платёж"
+    document: "документ"
+    order_item: "позицию"
+    stock_movement: "движение по складу"
