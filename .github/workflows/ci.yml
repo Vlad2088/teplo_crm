@@ -31,6 +31,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
+      - name: Install libvips (для ruby-vips при буте приложения)
+        run: sudo apt-get update && sudo apt-get install -y libvips42
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
