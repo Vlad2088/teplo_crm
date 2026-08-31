@@ -20,7 +20,7 @@
 
       <%= field_wrapper form, :status, "Статус *" do %>
         <%= form.select :status,
-            Order.statuses.keys.map { |s| [s.humanize, s] },
+            order_status_options,
             {},
             class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
       <% end %>
