@@ -10,29 +10,29 @@ module ApplicationHelper
   end
 
   ORDER_STATUS_NAMES = {
-    'lead' => 'Лид',
-    'measurement' => 'Замер',
-    'estimate' => 'Смета',
-    'contract_signed' => 'Договор подписан',
-    'materials_paid' => 'Материалы оплачены',
-    'installation' => 'Монтаж',
-    'act_signed' => 'Акт подписан',
-    'installation_paid' => 'Монтаж оплачен',
-    'completed' => 'Завершён',
-    'cancelled' => 'Отменён'
+    "lead" => "Лид",
+    "measurement" => "Замер",
+    "estimate" => "Смета",
+    "contract_signed" => "Договор подписан",
+    "materials_paid" => "Материалы оплачены",
+    "installation" => "Монтаж",
+    "act_signed" => "Акт подписан",
+    "installation_paid" => "Монтаж оплачен",
+    "completed" => "Завершён",
+    "cancelled" => "Отменён"
   }.freeze
 
   DOC_TYPE_NAMES = {
-    'estimate' => 'Смета',
-    'invoice' => 'Счет',
-    'act' => 'Акт',
-    'contract' => 'Договор',
-    'upd' => 'УПД'
+    "estimate" => "Смета",
+    "invoice" => "Счет",
+    "act" => "Акт",
+    "contract" => "Договор",
+    "upd" => "УПД"
   }.freeze
 
   PAYMENT_TYPE_NAMES = {
-    'cash' => 'Наличные',
-    'cashless' => 'Безналичные'
+    "cash" => "Наличные",
+    "cashless" => "Безналичные"
   }.freeze
 
   # Хелпер для отображения статуса заказа с цветом
@@ -54,7 +54,7 @@ module ApplicationHelper
 
   # Русские названия статусов заказа для формы
   def order_status_options
-    Order.statuses.keys.map { |s| [ORDER_STATUS_NAMES[s] || s.humanize, s] }
+    Order.statuses.keys.map { |s| [ ORDER_STATUS_NAMES[s] || s.humanize, s ] }
   end
 
   # Отображение типа клиента
@@ -99,12 +99,12 @@ module ApplicationHelper
 
   # Русские названия типов документов для формы
   def doc_type_options
-    Document.doc_types.keys.map { |d| [DOC_TYPE_NAMES[d] || d.humanize, d] }
+    Document.doc_types.keys.map { |d| [ DOC_TYPE_NAMES[d] || d.humanize, d ] }
   end
 
   # Русские названия типов оплаты для формы
   def payment_type_options
-    Payment.payment_types.keys.map { |p| [PAYMENT_TYPE_NAMES[p] || p.humanize, p] } 
+    Payment.payment_types.keys.map { |p| [ PAYMENT_TYPE_NAMES[p] || p.humanize, p ] }
   end
 
   # Заголовок формы (общий компонент)
