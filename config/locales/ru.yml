@@ -1,0 +1,74 @@
+---
+ru:
+  hello: "Привет, мир"
+  helpers:
+    submit:
+      create: "Создать %{model}"
+      update: "Сохранить изменения"
+      submit: "Сохранить"
+  activerecord:
+    models:
+      client: "Клиент"
+      order: "Заказ"
+      product: "Товар"
+      service: "Услуга"
+      payment: "Платёж"
+      document: "Документ"
+      order_item: "Позиция заказа"
+      stock_movement: "Движение по складу"
+      user: "Пользователь"
+    attributes:
+      client:
+        name: "Имя"
+        phone: "Телефон"
+        email: "Email"
+        address: "Адрес"
+        client_type: "Тип клиента"
+        notes: "Заметки"
+      order:
+        client: "Клиент"
+        status: "Статус"
+        address: "Адрес"
+        area_sqm: "Площадь, м²"
+        measurement_date: "Дата замера"
+        notes: "Заметки"
+        user: "Менеджер"
+      product:
+        name: "Название"
+        sku: "Артикул"
+        category: "Категория"
+        brand: "Бренд"
+        unit: "Ед. изм."
+        sale_price: "Цена продажи"
+        purchase_price: "Цена закупки"
+        stock_quantity: "Остаток на складе"
+      service:
+        name: "Название"
+        price_per_sqm: "Цена за м²"
+        description: "Описание"
+      payment:
+        amount: "Сумма"
+        payment_type: "Тип оплаты"
+        paid_at: "Дата оплаты"
+        description: "Описание"
+      document:
+        doc_type: "Тип документа"
+        title: "Название"
+        description: "Описание"
+        document_date: "Дата документа"
+      order_item:
+        item: "Товар/услуга"
+        quantity: "Кол-во"
+        unit_price: "Цена за ед."
+        total_price: "Итого"
+      stock_movement:
+        product: "Товар"
+        movement_type: "Тип движения"
+        quantity_change: "Изменение количества"
+        order: "Заказ"
+  enumerize:
+    client:
+      client_type:
+        individual: "Физлицо"
+        entrepreneur: "ИП"
+        legal_entity: "Юрлицо"
