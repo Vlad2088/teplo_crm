@@ -32,6 +32,6 @@ class CompanySettingsController < ApplicationController
     def company_setting_params
       params.expect(company_setting: [ :name, :inn, :kpp, :address, :phone, :email,
                                        :bank_name, :bank_bik, :bank_account, :bank_corr_account,
-                                       :director_name, :position_title ])
+                                       :director_name, :position_title, :company_type, :ogrn, :okpo, :okved, :short_name ])
     end
 end
