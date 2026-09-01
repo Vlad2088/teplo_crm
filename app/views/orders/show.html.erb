@@ -157,7 +157,7 @@
             <%= f.number_field :discount_percent, min: 0, max: 100, step: 0.5,
                 class: "w-24 rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-base font-semibold text-right",
                 data: { action: "change->sale-summary#applyDiscount" } %>
-            <%= f.submit "OK", class: "px-5 py-2 text-sm font-medium rounded-lg bg-orange-600 hover:bg-orange-500 text-white cursor-pointer shadow-sm transition" %>
+            <%= f.submit "OK", class: "px-6 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition cursor-pointer shadow-sm" %>
           </div>
         <% end %>
       </div>
