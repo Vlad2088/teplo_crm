@@ -1,0 +1,81 @@
+<% content_for :title, "Реквизиты компании" %>
+
+<div class="w-full max-w-3xl">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Реквизиты компании</h1>
+      <p class="text-sm text-gray-500 mt-1">Используются в печатных формах: смета, акт, счёт</p>
+    </div>
+  </div>
+
+  <% if notice.present? %>
+    <p class="py-2 px-3 bg-green-50 mb-5 text-green-700 font-medium rounded-md inline-block"><%= notice %></p>
+  <% end %>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <%= form_with model: @company_setting, url: company_setting_path, method: :patch do |f| %>
+      <% if @company_setting.errors.any? %>
+        <div class="m-5 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <h3 class="text-red-800 font-semibold mb-2"><%= ru_pluralize(@company_setting.errors.count, "ошибка", "ошибки", "ошибок") %>:</h3>
+          <ul class="list-disc ml-6 text-red-700 text-sm">
+            <% @company_setting.errors.each do |error| %>
+              <li><%= error.full_message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="p-6 space-y-5">
+        <%= form_section "Основное" do %>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <%= field_wrapper f, :name, "Наименование *" do %>
+              <%= f.text_field :name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm", placeholder: "ИП Иванов Иван Иванович" %>
+            <% end %>
+            <%= field_wrapper f, :position_title, "Должность / статус" do %>
+              <%= f.text_field :position_title, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm", placeholder: "Индивидуальный предприниматель" %>
+            <% end %>
+            <%= field_wrapper f, :director_name, "ФИО (для подписи)" do %>
+              <%= f.text_field :director_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm", placeholder: "Иванов Иван Иванович" %>
+            <% end %>
+            <%= field_wrapper f, :inn, "ИНН *" do %>
+              <%= f.text_field :inn, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm", placeholder: "181801103395" %>
+            <% end %>
+            <%= field_wrapper f, :kpp, "КПП" do %>
+              <%= f.text_field :kpp, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+            <% end %>
+            <%= field_wrapper f, :phone, "Телефон" do %>
+              <%= f.text_field :phone, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm", placeholder: "+7 (999) 123-45-67" %>
+            <% end %>
+            <%= field_wrapper f, :email, "Email" do %>
+              <%= f.text_field :email, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+            <% end %>
+            <%= field_wrapper f, :address, "Адрес" do %>
+              <%= f.text_field :address, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+            <% end %>
+          </div>
+        <% end %>
+
+        <%= form_section "Банковские реквизиты" do %>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <%= field_wrapper f, :bank_name, "Банк" do %>
+              <%= f.text_field :bank_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm", placeholder: "ПАО Сбербанк" %>
+            <% end %>
+            <%= field_wrapper f, :bank_bik, "БИК" do %>
+              <%= f.text_field :bank_bik, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+            <% end %>
+            <%= field_wrapper f, :bank_account, "Расчётный счёт" do %>
+              <%= f.text_field :bank_account, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+            <% end %>
+            <%= field_wrapper f, :bank_corr_account, "Корр. счёт" do %>
+              <%= f.text_field :bank_corr_account, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="px-6 pb-6 flex justify-end gap-3">
+        <%= f.submit "Сохранить", class: "px-6 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition cursor-pointer shadow-sm" %>
+      </div>
+    <% end %>
+  </div>
+</div>

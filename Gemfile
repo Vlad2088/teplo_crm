@@ -20,6 +20,8 @@ gem "tailwindcss-rails"
 gem "jbuilder"
 # аутентификация
 gem "devise"
+gem "prawn", "~> 2.5"
+gem "prawn-table", "~> 0.2"
 # авторизация (если понадобится больше ролей)
 gem "pundit"
 

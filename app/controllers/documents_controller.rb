@@ -17,6 +17,19 @@ class DocumentsController < ApplicationController
     end
   end
 
+  # GET /orders/:order_id/documents/:id/pdf — печатная форма
+  def pdf
+    document = @order.documents.find(params.expect(:id))
+    pdf_body = Pdf::DocumentsService.new(document).render
+
+    send_data pdf_body,
+              filename: "#{document.doc_type}_#{document.id}.pdf",
+              type: "application/pdf",
+              disposition: "inline"
+  rescue ActiveRecord::RecordNotFound
+    redirect_to @order, alert: "Документ не найден."
+  end
+
   # DELETE /orders/:order_id/documents/:id
   def destroy
     @document.destroy!
