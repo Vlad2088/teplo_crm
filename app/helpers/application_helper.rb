@@ -1,4 +1,21 @@
 module ApplicationHelper
+  # Русская плюрализация: ru_pluralize(3, "ошибка", "ошибки", "ошибок") -> "3 ошибки"
+  def ru_pluralize(count, one, few, many)
+    n = count.abs
+    mod100 = n % 100
+    mod10 = n % 10
+    form = if mod100.between?(11, 14)
+             many
+    elsif mod10 == 1
+             one
+    elsif mod10.between?(2, 4)
+             few
+    else
+             many
+    end
+    "#{count} #{form}"
+  end
+
   def sidebar_link(label, path)
     is_active = request.path == path || request.path.start_with?("#{path}/")
     base_class = "block px-4 py-2 rounded-md text-sm font-medium transition"

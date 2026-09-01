@@ -1,0 +1,34 @@
+---
+ru:
+  devise:
+    sessions:
+      signed_in: "Вы вошли в систему."
+      signed_out: "Вы вышли из системы."
+      new:
+        sign_in: "Вход"
+    registrations:
+      new:
+        sign_up: "Регистрация"
+      edit:
+        title: "Настройки профиля"
+    passwords:
+      new:
+        forgot_your_password: "Забыли пароль?"
+        send_me_reset_password_instructions: "Отправить инструкции для сброса пароля"
+      edit:
+        change_your_password: "Изменить пароль"
+    shared:
+      links:
+        sign_in: "Войти"
+        sign_up: "Зарегистрироваться"
+        forgot_your_password: "Забыли пароль?"
+    failure:
+      invalid: "Неверный email или пароль."
+      unauthenticated: "Вам нужно войти в систему."
+  activerecord:
+    attributes:
+      user:
+        email: "Email"
+        password: "Пароль"
+        password_confirmation: "Подтверждение пароля"
+        remember_me: "Запомнить меня"

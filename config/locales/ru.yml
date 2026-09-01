@@ -1,0 +1,128 @@
+---
+ru:
+  hello: "Привет, мир"
+  helpers:
+    submit:
+      create: "Создать %{model}"
+      update: "Сохранить изменения"
+      submit: "Сохранить"
+  activerecord:
+    models:
+      client: "Клиент"
+      order: "Заказ"
+      product: "Товар"
+      service: "Услуга"
+      payment: "Платёж"
+      document: "Документ"
+      order_item: "Позиция заказа"
+      stock_movement: "Движение по складу"
+      user: "Пользователь"
+    attributes:
+      client:
+        name: "Имя"
+        phone: "Телефон"
+        email: "Email"
+        address: "Адрес"
+        client_type: "Тип клиента"
+        notes: "Заметки"
+      order:
+        client: "Клиент"
+        status: "Статус"
+        address: "Адрес"
+        area_sqm: "Площадь, м²"
+        measurement_date: "Дата замера"
+        notes: "Заметки"
+        user: "Менеджер"
+      product:
+        name: "Название"
+        sku: "Артикул"
+        category: "Категория"
+        brand: "Бренд"
+        unit: "Ед. изм."
+        sale_price: "Цена продажи"
+        purchase_price: "Цена закупки"
+        stock_quantity: "Остаток на складе"
+      service:
+        name: "Название"
+        price_per_sqm: "Цена за м²"
+        description: "Описание"
+      payment:
+        amount: "Сумма"
+        payment_type: "Тип оплаты"
+        paid_at: "Дата оплаты"
+        description: "Описание"
+      document:
+        doc_type: "Тип документа"
+        title: "Название"
+        description: "Описание"
+        document_date: "Дата документа"
+      order_item:
+        item: "Товар/услуга"
+        quantity: "Кол-во"
+        unit_price: "Цена за ед."
+        total_price: "Итого"
+      stock_movement:
+        product: "Товар"
+        movement_type: "Тип движения"
+        quantity_change: "Изменение количества"
+        order: "Заказ"
+  enumerize:
+    client:
+      client_type:
+        individual: "Физлицо"
+        entrepreneur: "ИП"
+        legal_entity: "Юрлицо"
+  date:
+    formats:
+      default: "%d.%m.%Y"
+      short: "%d %b"
+      long: "%d %B %Y"
+    day_names: [воскресенье, понедельник, вторник, среда, четверг, пятница, суббота]
+    standalone_day_names: [Воскресенье, Понедельник, Вторник, Среда, Четверг, Пятница, Суббота]
+    abbr_day_names: [Вс, Пн, Вт, Ср, Чт, Пт, Сб]
+    month_names: [января, февраля, марта, апреля, мая, июня, июля, августа, сентября, октября, ноября, декабря]
+    standalone_month_names: [Январь, Февраль, Март, Апрель, Май, Июнь, Июль, Август, Сентябрь, Октябрь, Ноябрь, Декабрь]
+    abbr_month_names: [янв., февр., мар., апр., мая, июн., июл., авг., сент., окт., нояб., дек.]
+  time:
+    formats:
+      default: "%a, %d %b %Y, %H:%M:%S %z"
+      short: "%d %b %H:%M"
+      long: "%d %B %Y, %H:%M"
+      time_only: "%H:%M"
+    am: "утра"
+    pm: "вечера"
+  genitive:
+    client: "клиента"
+    order: "заказ"
+    product: "товар"
+    service: "услугу"
+    payment: "платёж"
+    document: "документ"
+    order_item: "позицию"
+    stock_movement: "движение по складу"
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "не может быть пустым"
+      empty: "не может быть пустым"
+      required: "должен быть заполнен"
+      taken: "уже существует"
+      invalid: "имеет неверное значение"
+      confirmation: "не совпадает со значением %{attribute}"
+      accepted: "должно быть принято"
+      too_short: "слишком короткое (минимум %{count} симв.)"
+      too_long: "слишком длинное (максимум %{count} симв.)"
+      wrong_length: "неверной длины (должно быть %{count} симв.)"
+      not_a_number: "не является числом"
+      not_an_integer: "должно быть целым числом"
+      greater_than: "должно быть больше %{count}"
+      greater_than_or_equal_to: "должно быть больше или равно %{count}"
+      equal_to: "должно быть равно %{count}"
+      less_than: "должно быть меньше %{count}"
+      less_than_or_equal_to: "должно быть меньше или равно %{count}"
+      other_than: "должно отличаться от %{count}"
+      odd: "должно быть нечётным"
+      even: "должно быть чётным"
+      inclusion: "не входит в список допустимых значений"
+      exclusion: "зарезервировано"
+      record_invalid: "Возникли ошибки: %{errors}"

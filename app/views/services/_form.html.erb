@@ -1,9 +1,8 @@
-<%= form_with(model: service, class: "contents") do |form| %>
+<%= form_with(model: service) do |form| %>
   <% if service.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
-      <h2><%= pluralize(service.errors.count, "error") %> prohibited this service from being saved:</h2>
-
-      <ul class="list-disc ml-6">
+    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+      <h3 class="text-red-800 font-semibold mb-2"><%= ru_pluralize(service.errors.count, "ошибка", "ошибки", "ошибок") %>:</h3>
+      <ul class="list-disc ml-6 text-red-700 text-sm">
         <% service.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -11,22 +10,29 @@
     </div>
   <% end %>
 
-  <div class="my-5">
-    <%= form.label :name %>
-    <%= form.text_field :name, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": service.errors[:name].none?, "border-red-400 focus:outline-red-600": service.errors[:name].any?}] %>
-  </div>
+  <%= form_section "Основная информация" do %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <%= field_wrapper form, :name, "Название *" do %>
+        <%= form.text_field :name,
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+            placeholder: "Например: Монтаж тёплого пола" %>
+      <% end %>
 
-  <div class="my-5">
-    <%= form.label :price_per_sqm %>
-    <%= form.text_field :price_per_sqm, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": service.errors[:price_per_sqm].none?, "border-red-400 focus:outline-red-600": service.errors[:price_per_sqm].any?}] %>
-  </div>
+      <%= field_wrapper form, :price_per_sqm, "Цена за м² *" do %>
+        <%= form.text_field :price_per_sqm,
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+            placeholder: "500" %>
+      <% end %>
+    </div>
 
-  <div class="my-5">
-    <%= form.label :description %>
-    <%= form.textarea :description, rows: 4, class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": service.errors[:description].none?, "border-red-400 focus:outline-red-600": service.errors[:description].any?}] %>
-  </div>
+    <%= field_wrapper form, :description, "Описание" do %>
+      <%= form.text_area :description, rows: 4,
+          class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+          placeholder: "Что входит в услугу" %>
+    <% end %>
+  <% end %>
 
-  <div class="inline">
-    <%= form.submit class: "w-full sm:w-auto rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+  <div class="flex items-center gap-3">
+    <%= form.submit (service.persisted? ? "Сохранить изменения" : "Создать"), class: "px-6 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition cursor-pointer shadow-sm" %>
   </div>
 <% end %>
