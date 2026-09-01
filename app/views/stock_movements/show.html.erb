@@ -23,6 +23,16 @@
         <dd class="text-sm text-gray-900"><%= link_to @stock_movement.product.name, @stock_movement.product, class: "text-orange-600 hover:text-orange-700 hover:underline" %></dd>
       </div>
       <div class="px-6 py-4 flex justify-between gap-4">
+        <dt class="text-sm font-medium text-gray-500">Заказ</dt>
+        <dd class="text-sm text-gray-900">
+          <% if @stock_movement.order %>
+            <%= link_to "Заказ ##{@stock_movement.order.id} — #{@stock_movement.order.client&.name}", @stock_movement.order, class: "text-orange-600 hover:text-orange-700 hover:underline" %>
+          <% else %>
+            <span class="text-gray-400">Без заказа (приход)</span>
+          <% end %>
+        </dd>
+      </div>
+      <div class="px-6 py-4 flex justify-between gap-4">
         <dt class="text-sm font-medium text-gray-500">Количество</dt>
         <dd class="text-sm text-gray-900"><%= @stock_movement.quantity_change %></dd>
       </div>

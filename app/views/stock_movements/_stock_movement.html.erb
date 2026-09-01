@@ -5,6 +5,14 @@
   <td class="px-6 py-3.5 whitespace-nowrap font-medium text-gray-900">
     <%= link_to stock_movement.product.name, stock_movement.product, class: "text-orange-600 hover:text-orange-700 hover:underline" %>
   </td>
+  <td class="px-6 py-3.5 whitespace-nowrap">
+    <% if stock_movement.order %>
+      <%= link_to "##{stock_movement.order.id}", stock_movement.order, class: "text-orange-600 hover:text-orange-700 hover:underline font-medium" %>
+      <span class="text-gray-400 text-xs ml-1"><%= stock_movement.order.client&.name %></span>
+    <% else %>
+      <span class="text-gray-400">—</span>
+    <% end %>
+  </td>
   <td class="px-6 py-3.5 whitespace-nowrap text-gray-600"><%= stock_movement.quantity_change %></td>
   <td class="px-6 py-3.5 whitespace-nowrap text-gray-500 text-sm">
     <%= l(stock_movement.created_at, format: :short) if stock_movement.created_at %>
