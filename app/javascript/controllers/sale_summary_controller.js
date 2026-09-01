@@ -67,6 +67,36 @@ export default class extends Controller {
     this.recalc()
   }
 
+  // пересчёт итогов при изменении скидки (до сохранения — мгновенный отклик)
+  applyDiscount() {
+    this.recalcTotals()
+  }
+
+  recalcTotals() {
+    const itemsTotal = this.parseServerMoney(this.itemsTotalTarget?.textContent)
+    if (!this.hasItemsTotalTarget || itemsTotal === 0) return
+
+    const discountInput = this.element.querySelector("input[name=\"order[discount_percent]\"]")
+    const discount = Math.min(100, Math.max(0, this.parseNum(discountInput?.value)))
+    const discountAmount = itemsTotal * discount / 100
+    const totalDue = itemsTotal - discountAmount
+
+    if (this.hasDiscountAmountTarget) {
+      this.discountAmountTarget.textContent = "− " + this.formatMoney(discountAmount)
+    }
+    if (this.hasTotalDueTarget) {
+      this.totalDueTarget.textContent = this.formatMoney(totalDue)
+    }
+  }
+
+  // "29 000 ₽" -> 29000
+  parseServerMoney(text) {
+    if (!text) return 0
+    const cleaned = String(text).replace(/[^\d.,-]/g, "").replace(",", ".")
+    const parsed = parseFloat(cleaned)
+    return isNaN(parsed) ? 0 : parsed
+  }
+
   recalc() {
     const qty = this.parseNum(this.quantityTarget?.value)
     const price = this.parseNum(this.unitPriceTarget?.value)
