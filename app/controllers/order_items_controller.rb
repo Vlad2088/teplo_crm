@@ -1,70 +1,42 @@
 class OrderItemsController < ApplicationController
-  before_action :set_order_item, only: %i[ show edit update destroy ]
+  before_action :set_order
+  before_action :set_order_item, only: %i[ destroy ]
 
-  # GET /order_items or /order_items.json
-  def index
-    @order_items = OrderItem.all
-  end
-
-  # GET /order_items/1 or /order_items/1.json
-  def show
-  end
-
-  # GET /order_items/new
-  def new
-    @order_item = OrderItem.new
-  end
-
-  # GET /order_items/1/edit
-  def edit
-  end
-
-  # POST /order_items or /order_items.json
+  # POST /orders/:order_id/order_items
   def create
-    @order_item = OrderItem.new(order_item_params)
+    @order_item = @order.order_items.build(order_item_params)
 
     respond_to do |format|
       if @order_item.save
-        format.html { redirect_to @order_item, notice: "Order item was successfully created." }
-        format.json { render :show, status: :created, location: @order_item }
+        format.html { redirect_to @order, notice: "Позиция добавлена в заказ." }
+        format.json { render :show, status: :created, location: @order }
       else
-        format.html { render :new, status: :unprocessable_content }
+        format.html { redirect_to @order, alert: @order_item.errors.full_messages.to_sentence }
         format.json { render json: @order_item.errors, status: :unprocessable_content }
       end
     end
   end
 
-  # PATCH/PUT /order_items/1 or /order_items/1.json
-  def update
-    respond_to do |format|
-      if @order_item.update(order_item_params)
-        format.html { redirect_to @order_item, notice: "Order item was successfully updated.", status: :see_other }
-        format.json { render :show, status: :ok, location: @order_item }
-      else
-        format.html { render :edit, status: :unprocessable_content }
-        format.json { render json: @order_item.errors, status: :unprocessable_content }
-      end
-    end
-  end
-
-  # DELETE /order_items/1 or /order_items/1.json
+  # DELETE /orders/:order_id/order_items/:id
   def destroy
     @order_item.destroy!
-
     respond_to do |format|
-      format.html { redirect_to order_items_path, notice: "Order item was successfully destroyed.", status: :see_other }
+      format.html { redirect_to @order, notice: "Позиция удалена, товар возвращён на склад.", status: :see_other }
       format.json { head :no_content }
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_order_item
-      @order_item = OrderItem.find(params.expect(:id))
+
+    def set_order
+      @order = Order.find(params.expect(:order_id))
     end
 
-    # Only allow a list of trusted parameters through.
+    def set_order_item
+      @order_item = @order.order_items.find(params.expect(:id))
+    end
+
     def order_item_params
-      params.expect(order_item: [ :order_id, :item_type, :item_id, :quantity, :unit_price, :total_price ])
+      params.expect(order_item: [ :item_type, :item_id, :quantity, :unit_price ])
     end
 end

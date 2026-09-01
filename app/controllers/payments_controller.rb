@@ -1,70 +1,42 @@
 class PaymentsController < ApplicationController
-  before_action :set_payment, only: %i[ show edit update destroy ]
+  before_action :set_order
+  before_action :set_payment, only: %i[ destroy ]
 
-  # GET /payments or /payments.json
-  def index
-    @payments = Payment.all
-  end
-
-  # GET /payments/1 or /payments/1.json
-  def show
-  end
-
-  # GET /payments/new
-  def new
-    @payment = Payment.new
-  end
-
-  # GET /payments/1/edit
-  def edit
-  end
-
-  # POST /payments or /payments.json
+  # POST /orders/:order_id/payments
   def create
-    @payment = Payment.new(payment_params)
+    @payment = @order.payments.build(payment_params)
 
     respond_to do |format|
       if @payment.save
-        format.html { redirect_to @payment, notice: "Payment was successfully created." }
-        format.json { render :show, status: :created, location: @payment }
+        format.html { redirect_to @order, notice: "Оплата внесена." }
+        format.json { render :show, status: :created, location: @order }
       else
-        format.html { render :new, status: :unprocessable_content }
+        format.html { redirect_to @order, alert: @payment.errors.full_messages.to_sentence }
         format.json { render json: @payment.errors, status: :unprocessable_content }
       end
     end
   end
 
-  # PATCH/PUT /payments/1 or /payments/1.json
-  def update
-    respond_to do |format|
-      if @payment.update(payment_params)
-        format.html { redirect_to @payment, notice: "Payment was successfully updated.", status: :see_other }
-        format.json { render :show, status: :ok, location: @payment }
-      else
-        format.html { render :edit, status: :unprocessable_content }
-        format.json { render json: @payment.errors, status: :unprocessable_content }
-      end
-    end
-  end
-
-  # DELETE /payments/1 or /payments/1.json
+  # DELETE /orders/:order_id/payments/:id
   def destroy
     @payment.destroy!
-
     respond_to do |format|
-      format.html { redirect_to payments_path, notice: "Payment was successfully destroyed.", status: :see_other }
+      format.html { redirect_to @order, notice: "Оплата удалена.", status: :see_other }
       format.json { head :no_content }
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_payment
-      @payment = Payment.find(params.expect(:id))
+
+    def set_order
+      @order = Order.find(params.expect(:order_id))
     end
 
-    # Only allow a list of trusted parameters through.
+    def set_payment
+      @payment = @order.payments.find(params.expect(:id))
+    end
+
     def payment_params
-      params.expect(payment: [ :order_id, :amount, :paid_at, :payment_type, :description ])
+      params.expect(payment: [ :amount, :payment_type, :paid_at, :description ])
     end
 end

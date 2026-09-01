@@ -114,6 +114,27 @@ module ApplicationHelper
     tag.span names[movement_type] || movement_type.humanize, class: "px-2 py-1 text-xs font-medium rounded-full #{colors[movement_type] || 'bg-gray-100 text-gray-600'}"
   end
 
+  # JSON-каталог товаров/услуг для Stimulus-контроллера формы продажи
+  def sale_catalog_json(products, services)
+    catalog = {
+      "Product" => products.index_by(&:id).transform_values { |p| { name: p.name, price: p.sale_price, unit: p.unit, stock: p.stock_quantity } },
+      "Service" => services.index_by(&:id).transform_values { |sv| { name: sv.name, price: sv.price_per_sqm } }
+    }
+    catalog.to_json
+  end
+
+  # Бадж типа документа
+  def doc_type_badge(doc_type)
+    colors = { "estimate" => "bg-indigo-100 text-indigo-700", "invoice" => "bg-blue-100 text-blue-700", "act" => "bg-green-100 text-green-700", "contract" => "bg-purple-100 text-purple-700", "upd" => "bg-teal-100 text-teal-700" }
+    tag.span DOC_TYPE_NAMES[doc_type] || doc_type, class: "px-2 py-1 text-xs font-medium rounded-full #{colors[doc_type] || 'bg-gray-100 text-gray-600'}"
+  end
+
+  # Бадж типа оплаты
+  def payment_type_badge(payment_type)
+    colors = { "cash" => "bg-green-100 text-green-700", "cashless" => "bg-blue-100 text-blue-700" }
+    tag.span PAYMENT_TYPE_NAMES[payment_type] || payment_type, class: "px-2 py-1 text-xs font-medium rounded-full #{colors[payment_type] || 'bg-gray-100 text-gray-600'}"
+  end
+
   # Русские названия типов документов для формы
   def doc_type_options
     Document.doc_types.keys.map { |d| [ DOC_TYPE_NAMES[d] || d.humanize, d ] }
