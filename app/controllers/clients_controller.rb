@@ -65,6 +65,12 @@ class ClientsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def client_params
-      params.expect(client: [ :name, :phone, :email, :address, :client_type ])
+      params.expect(client: [ :name, :phone, :email, :address, :client_type,
+      :gender, :birth_date, :birth_place,
+      :passport_series, :passport_number, :passport_issued_on,
+      :passport_department_code, :passport_issued_by, :registration_address,
+      :inn, :kpp, :ogrn, :okpo, :okved, :short_name,
+      :bank_name, :bank_bik, :bank_account, :bank_corr_account,
+      :director_position, :director_name ])
     end
 end

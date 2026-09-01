@@ -40,10 +40,8 @@ class Pdf::DocumentsService
       pdf.bounding_box([ 0, pdf.cursor ], width: 300) do
         pdf.font "DejaVu", size: 10 do
           pdf.text company.name.to_s, size: 12, style: :bold
-          pdf.text company.position_title.to_s if company.position_title.present?
-          pdf.text "ИНН #{company.inn}" if company.inn.present?
+          company.requisites_lines.each { |line| pdf.text line }
           pdf.text company.phone.to_s if company.phone.present?
-          pdf.text company.address.to_s if company.address.present?
         end
       end
       pdf.bounding_box([ pdf.bounds.right - 200, pdf.cursor ], width: 200) do
@@ -60,13 +58,13 @@ class Pdf::DocumentsService
       pdf.move_down 16
     end
 
-    # Блок заказчика и объекта
+    # Блок заказчика и объекта — реквизиты по типу клиента
     def draw_customer(pdf)
       client = order.client
       pdf.font "DejaVu", size: 10 do
-        pdf.text "<b>Заказчик:</b> #{client&.name}", inline_format: true
-        pdf.text "ИНН #{client.inn}" if client&.inn.present?
-        pdf.text client&.phone.to_s if client&.phone.present?
+        pdf.text "<b>Заказчик:</b> #{client&.display_name}", inline_format: true
+        client&.requisites_lines&.each { |line| pdf.text line }
+        pdf.text "Тел.: #{client.phone}" if client&.phone.present?
         pdf.move_down 6
         pdf.text "<b>Адрес объекта:</b> #{order.address}", inline_format: true
         pdf.move_down 14
@@ -140,7 +138,7 @@ class Pdf::DocumentsService
         pdf.move_down 55
 
         # ФИО под подписями
-        pdf.draw_text(company.director_name.to_s, at: [ 0, pdf.cursor ]) if company.director_name.present?
+        pdf.draw_text(company.signature_caption.to_s, at: [ 0, pdf.cursor ])
         pdf.draw_text(order.client&.name.to_s, at: [ pdf.bounds.right - 150, pdf.cursor ]) if order.client
       end
     end

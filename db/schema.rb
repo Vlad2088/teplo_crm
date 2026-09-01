@@ -10,19 +10,38 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_01_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_01_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "clients", force: :cascade do |t|
     t.text "address"
+    t.string "bank_account"
+    t.string "bank_bik"
+    t.string "bank_corr_account"
+    t.string "bank_name"
+    t.date "birth_date"
+    t.string "birth_place"
     t.integer "client_type"
     t.datetime "created_at", null: false
+    t.string "director_name"
+    t.string "director_position"
     t.string "email"
+    t.integer "gender"
     t.string "inn"
     t.string "kpp"
     t.string "name"
+    t.string "ogrn"
+    t.string "okpo"
+    t.string "okved"
+    t.string "passport_department_code"
+    t.string "passport_issued_by"
+    t.date "passport_issued_on"
+    t.string "passport_number"
+    t.string "passport_series"
     t.string "phone"
+    t.text "registration_address"
+    t.string "short_name"
     t.datetime "updated_at", null: false
   end
 
@@ -32,14 +51,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_01_090000) do
     t.string "bank_bik"
     t.string "bank_corr_account"
     t.string "bank_name"
+    t.integer "company_type", default: 0, null: false
     t.datetime "created_at", null: false
     t.string "director_name"
     t.string "email"
     t.string "inn"
     t.string "kpp"
     t.string "name", null: false
+    t.string "ogrn"
+    t.string "okpo"
+    t.string "okved"
     t.string "phone"
     t.string "position_title", default: "Индивидуальный предприниматель"
+    t.string "short_name"
     t.datetime "updated_at", null: false
   end
 
