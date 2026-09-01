@@ -44,13 +44,18 @@
 
   <!-- СОСТАВ ЗАКАЗА -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-      <h2 class="text-lg font-semibold text-gray-800">Состав заказа</h2>
-      <button type="button" data-action="click->sale-summary#toggleForm" data-sale-summary-target="toggleBtn"
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center cursor-pointer select-none hover:bg-gray-50 transition"
+         data-action="click->sale-summary#toggleSection" data-sale-summary-section-param="items">
+      <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <span data-sale-summary-target="itemsArrow" class="text-gray-400 text-sm inline-block transition-transform">▾</span>
+        Состав заказа
+      </h2>
+      <button type="button" data-action="click->sale-summary#toggleForm stop"
               class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition shadow-sm">
         + Добавить позицию
       </button>
     </div>
+    <div data-sale-summary-target="itemsBody">
 
     <!-- Форма добавления позиции -->
     <div data-sale-summary-target="itemForm" class="hidden px-6 py-4 bg-gray-50 border-b border-gray-100">
@@ -155,17 +160,23 @@
         <% end %>
       </div>
     </div>
+    </div>
   </div>
 
   <!-- ОПЛАТЫ -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-      <h2 class="text-lg font-semibold text-gray-800">Оплаты</h2>
-      <button type="button" data-action="click->sale-summary#togglePaymentForm"
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center cursor-pointer select-none hover:bg-gray-50 transition"
+         data-action="click->sale-summary#toggleSection" data-sale-summary-section-param="payments">
+      <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <span data-sale-summary-target="paymentsArrow" class="text-gray-400 text-sm inline-block transition-transform">▾</span>
+        Оплаты
+      </h2>
+      <button type="button" data-action="click->sale-summary#togglePaymentForm stop"
               class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition shadow-sm">
         + Внести оплату
       </button>
     </div>
+    <div data-sale-summary-target="paymentsBody">
 
     <!-- Форма оплаты -->
     <div data-sale-summary-target="paymentForm" class="hidden px-6 py-4 bg-gray-50 border-b border-gray-100">
@@ -239,17 +250,23 @@
         <span><%= format_currency(@order.balance_due) %></span>
       </div>
     </div>
+    </div>
   </div>
 
   <!-- ДОКУМЕНТЫ -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-      <h2 class="text-lg font-semibold text-gray-800">Документы</h2>
-      <button type="button" data-action="click->sale-summary#toggleDocumentForm"
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center cursor-pointer select-none hover:bg-gray-50 transition"
+         data-action="click->sale-summary#toggleSection" data-sale-summary-section-param="documents">
+      <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <span data-sale-summary-target="documentsArrow" class="text-gray-400 text-sm inline-block transition-transform">▾</span>
+        Документы
+      </h2>
+      <button type="button" data-action="click->sale-summary#toggleDocumentForm stop"
               class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition shadow-sm">
         + Добавить документ
       </button>
     </div>
+    <div data-sale-summary-target="documentsBody">
 
     <!-- Форма документа -->
     <div data-sale-summary-target="documentForm" class="hidden px-6 py-4 bg-gray-50 border-b border-gray-100">
@@ -311,6 +328,7 @@
     <% else %>
       <p class="px-6 py-8 text-center text-gray-400 text-sm">Документов пока нет</p>
     <% end %>
+    </div>
   </div>
 
   <div class="mt-6">

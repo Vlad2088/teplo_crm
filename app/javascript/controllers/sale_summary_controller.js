@@ -5,7 +5,9 @@ export default class extends Controller {
   static targets = [
     "itemForm", "toggleBtn", "paymentForm", "documentForm",
     "itemType", "itemId", "quantity", "unitPrice", "itemTotal",
-    "itemsTotal", "discountAmount", "totalDue"
+    "itemsTotal", "discountAmount", "totalDue",
+    "itemsBody", "paymentsBody", "documentsBody",
+    "itemsArrow", "paymentsArrow", "documentsArrow"
   ]
 
   // каталог: { "Product": { id: { price, unit, stock } }, "Service": { id: { price } } }
@@ -16,16 +18,35 @@ export default class extends Controller {
     this.recalc()
   }
 
+  // сворачивание/разворачивание целого блока по клику на заголовок
+  toggleSection(event) {
+    const section = event.params.section // items | payments | documents
+    const body = this[`${section}BodyTarget`]
+    const arrow = this[`${section}ArrowTarget`]
+    const collapsed = body.classList.toggle("hidden")
+    arrow.textContent = collapsed ? "▸" : "▾"
+  }
+
+  // раскрыть блок (если свёрнут) — вызывается кнопками "+"
+  expandSection(section) {
+    const body = this[`${section}BodyTarget`]
+    const arrow = this[`${section}ArrowTarget`]
+    body.classList.remove("hidden")
+    arrow.textContent = "▾"
+  }
+
   toggleForm() {
+    this.expandSection("items")
     this.itemFormTarget.classList.toggle("hidden")
-    this.toggleBtnTarget.classList.toggle("hidden")
   }
 
   togglePaymentForm() {
+    this.expandSection("payments")
     this.paymentFormTarget.classList.toggle("hidden")
   }
 
   toggleDocumentForm() {
+    this.expandSection("documents")
     this.documentFormTarget.classList.toggle("hidden")
   }
 
