@@ -8,6 +8,8 @@ class OrdersController < ApplicationController
 
   # GET /orders/1 or /orders/1.json
   def show
+    @products = Product.order(:name)
+    @services = Service.order(:name)
   end
 
   # GET /orders/new
@@ -65,6 +67,6 @@ class OrdersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def order_params
-      params.expect(order: [ :client_id, :status, :address, :area_sqm, :measurement_date, :notes, :user_id ])
+      params.expect(order: [ :client_id, :status, :address, :area_sqm, :measurement_date, :notes, :user_id, :discount_percent ])
     end
 end

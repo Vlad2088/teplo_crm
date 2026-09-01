@@ -4,9 +4,9 @@ Rails.application.routes.draw do
   resources :products
   resources :services
   resources :orders do
-    resources :payments
-    resources :documents
-    resources :order_items
+    resources :payments, only: %i[ create destroy ]
+    resources :documents, only: %i[ create destroy ]
+    resources :order_items, only: %i[ create destroy ]
   end
   resources :stock_movements
 

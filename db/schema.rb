@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_05_033149) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_01_031000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -30,6 +30,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_05_033149) do
     t.text "content"
     t.datetime "created_at", null: false
     t.integer "doc_type"
+    t.date "document_date"
     t.string "file_path"
     t.bigint "order_id", null: false
     t.string "title"
@@ -54,6 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_05_033149) do
     t.decimal "area_sqm"
     t.bigint "client_id", null: false
     t.datetime "created_at", null: false
+    t.decimal "discount_percent", precision: 5, scale: 2, default: "0.0", null: false
     t.date "measurement_date"
     t.text "notes"
     t.integer "status"
@@ -61,6 +63,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_05_033149) do
     t.bigint "user_id", null: false
     t.index ["client_id"], name: "index_orders_on_client_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
+    t.check_constraint "discount_percent >= 0::numeric AND discount_percent <= 100::numeric", name: "orders_discount_percent_range"
   end
 
   create_table "payments", force: :cascade do |t|

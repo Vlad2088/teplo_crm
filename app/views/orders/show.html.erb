@@ -1,6 +1,6 @@
 <% content_for :title, "Заказ ##{@order.id}" %>
 
-<div class="w-full">
+<div class="w-full" data-controller="sale-summary" data-sale-summary-catalog-value="<%= sale_catalog_json(@products, @services) %>">
   <div class="flex justify-between items-center mb-6">
     <div>
       <h1 class="text-2xl font-bold text-gray-900">Заказ #<%= @order.id %></h1>
@@ -8,11 +8,12 @@
     </div>
     <div class="flex space-x-2">
       <%= link_to "Изменить", edit_order_path(@order), class: "rounded-lg px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition shadow-sm" %>
-      <%= button_to "Удалить", @order, method: :delete, class: "rounded-lg px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition cursor-pointer", data: { turbo_confirm: "Удалить заказ ##{@order.id}?" } %>
+      <%= button_to "Удалить", @order, method: :delete, class: "rounded-lg px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition cursor-pointer", data: { turbo_confirm: "Удалить заказ ##{@order.id}? Позиции будут возвращены на склад." } %>
     </div>
   </div>
 
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <!-- Информация о заказе -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
     <dl class="divide-y divide-gray-100">
       <div class="px-6 py-4 flex justify-between gap-4">
         <dt class="text-sm font-medium text-gray-500">Клиент</dt>
@@ -38,11 +39,272 @@
         <dt class="text-sm font-medium text-gray-500">Примечания</dt>
         <dd class="text-sm text-gray-900"><%= @order.notes.presence || "—" %></dd>
       </div>
-      <div class="px-6 py-4 flex justify-between gap-4">
-        <dt class="text-sm font-medium text-gray-500">Создан</dt>
-        <dd class="text-sm text-gray-900"><%= l(@order.created_at, format: :long) if @order.created_at %></dd>
-      </div>
     </dl>
+  </div>
+
+  <!-- СОСТАВ ЗАКАЗА -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+      <h2 class="text-lg font-semibold text-gray-800">Состав заказа</h2>
+      <button type="button" data-action="click->sale-summary#toggleForm" data-sale-summary-target="toggleBtn"
+              class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition shadow-sm">
+        + Добавить позицию
+      </button>
+    </div>
+
+    <!-- Форма добавления позиции -->
+    <div data-sale-summary-target="itemForm" class="hidden px-6 py-4 bg-gray-50 border-b border-gray-100">
+      <%= form_with model: [ @order, OrderItem.new ], data: { sale_summary_target: "itemFormEl" } do |f| %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4">
+            <%= f.label :item_type, "Тип *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.select :item_type, options_for_select([[ "Товар", "Product" ], [ "Услуга", "Service" ]]),
+                {}, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+                data: { action: "change->sale-summary#itemTypeChanged", sale_summary_target: "itemType" } %>
+          </div>
+
+          <div class="mb-4">
+            <%= f.label :item_id, "Позиция *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.select :item_id, @products.map { |p| [ "#{p.name} (ост. #{p.stock_quantity} #{p.unit})", p.id ] },
+                { include_blank: "Выберите товар..." },
+                class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+                data: { action: "change->sale-summary#itemSelected", sale_summary_target: "itemId" } %>
+          </div>
+
+          <div class="mb-4">
+            <%= f.label :quantity, "Количество *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_field :quantity, value: 1,
+                class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+                data: { action: "input->sale-summary#recalc", sale_summary_target: "quantity" } %>
+          </div>
+
+          <div class="mb-4">
+            <%= f.label :unit_price, "Цена за ед., ₽ *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_field :unit_price,
+                class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
+                data: { action: "input->sale-summary#recalc", sale_summary_target: "unitPrice" } %>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-600">
+            Итого по позиции: <span data-sale-summary-target="itemTotal" class="font-semibold text-gray-900">0 ₽</span>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" data-action="click->sale-summary#toggleForm"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">Отмена</button>
+            <%= f.submit "Добавить", class: "px-6 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition cursor-pointer shadow-sm" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Таблица позиций -->
+    <% if @order.order_items.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Наименование</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Кол-во</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Цена за ед.</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Итого</th>
+            <th class="px-6 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @order.order_items.each do |item| %>
+            <tr>
+              <td class="px-6 py-3.5 text-sm text-gray-900">
+                <%= item.item&.name %>
+                <span class="ml-2 text-xs text-gray-400"><%= item.product_item? ? "товар" : "услуга" %></span>
+              </td>
+              <td class="px-6 py-3.5 text-sm text-gray-600 whitespace-nowrap"><%= item.quantity %> <%= item.product_item? ? item.item.unit : "м²" %></td>
+              <td class="px-6 py-3.5 text-sm text-gray-600 whitespace-nowrap"><%= format_currency(item.unit_price) %></td>
+              <td class="px-6 py-3.5 text-sm font-medium text-gray-900 whitespace-nowrap"><%= format_currency(item.total_price) %></td>
+              <td class="px-6 py-3.5 text-right">
+                <%= button_to "Удалить", [ @order, item ], method: :delete,
+                    class: "px-2.5 py-1.5 text-xs font-medium rounded bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer",
+                    data: { turbo_confirm: "Удалить позицию «#{item.item&.name}»? Товар вернётся на склад." } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="px-6 py-8 text-center text-gray-400 text-sm">В заказе пока нет позиций — добавьте товар или услугу</p>
+    <% end %>
+
+    <!-- Итоги по составу -->
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+      <div class="flex justify-between items-center text-sm text-gray-600 mb-1">
+        <span>Сумма позиций:</span>
+        <span data-sale-summary-target="itemsTotal"><%= format_currency(@order.items_total) %></span>
+      </div>
+      <div class="flex justify-between items-center text-sm text-gray-600 mb-1">
+        <span>Скидка <%= number_with_precision(@order.discount_percent, precision: 0, strip_insignificant_zeros: true) %>%:</span>
+        <span data-sale-summary-target="discountAmount">− <%= format_currency(@order.discount_amount) %></span>
+      </div>
+      <div class="flex justify-between items-center text-base font-semibold text-gray-900 pt-2 border-t border-gray-200">
+        <span>ИТОГО:</span>
+        <span data-sale-summary-target="totalDue"><%= format_currency(@order.total_due) %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ОПЛАТЫ -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+      <h2 class="text-lg font-semibold text-gray-800">Оплаты</h2>
+      <button type="button" data-action="click->sale-summary#togglePaymentForm"
+              class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition shadow-sm">
+        + Внести оплату
+      </button>
+    </div>
+
+    <!-- Форма оплаты -->
+    <div data-sale-summary-target="paymentForm" class="hidden px-6 py-4 bg-gray-50 border-b border-gray-100">
+      <%= form_with model: [ @order, Payment.new ] do |f| %>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="mb-4">
+            <%= f.label :amount, "Сумма, ₽ *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_field :amount, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+          </div>
+          <div class="mb-4">
+            <%= f.label :payment_type, "Тип *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.select :payment_type, payment_type_options, { selected: "cash" },
+                class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+          </div>
+          <div class="mb-4">
+            <%= f.label :paid_at, "Дата *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.date_field :paid_at, value: Date.current,
+                class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+          </div>
+        </div>
+        <div class="mb-4">
+          <%= f.label :description, "Примечание", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.text_field :description, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" data-action="click->sale-summary#togglePaymentForm"
+                  class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">Отмена</button>
+          <%= f.submit "Внести", class: "px-6 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition cursor-pointer shadow-sm" %>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @order.payments.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Тип</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Сумма</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Примечание</th>
+            <th class="px-6 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @order.payments.order(:paid_at).each do |payment| %>
+            <tr>
+              <td class="px-6 py-3.5 text-sm text-gray-600 whitespace-nowrap"><%= l(payment.paid_at, format: :long) if payment.paid_at %></td>
+              <td class="px-6 py-3.5 text-sm"><%= payment_type_badge(payment.payment_type) %></td>
+              <td class="px-6 py-3.5 text-sm font-medium text-gray-900 whitespace-nowrap"><%= format_currency(payment.amount) %></td>
+              <td class="px-6 py-3.5 text-sm text-gray-500"><%= payment.description.presence || "—" %></td>
+              <td class="px-6 py-3.5 text-right">
+                <%= button_to "Удалить", [ @order, payment ], method: :delete,
+                    class: "px-2.5 py-1.5 text-xs font-medium rounded bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer",
+                    data: { turbo_confirm: "Удалить оплату #{format_currency(payment.amount)}?" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="px-6 py-8 text-center text-gray-400 text-sm">Оплат пока нет</p>
+    <% end %>
+
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+      <div class="flex justify-between items-center text-sm text-gray-600 mb-1">
+        <span>Оплачено:</span>
+        <span><%= format_currency(@order.paid_total) %></span>
+      </div>
+      <div class="flex justify-between items-center text-base font-semibold <%= @order.balance_due <= 0 ? "text-green-600" : "text-orange-600" %> pt-2 border-t border-gray-200">
+        <span><%= @order.balance_due <= 0 ? "Оплачено полностью" : "Осталось оплатить:" %></span>
+        <span><%= format_currency(@order.balance_due) %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ДОКУМЕНТЫ -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+      <h2 class="text-lg font-semibold text-gray-800">Документы</h2>
+      <button type="button" data-action="click->sale-summary#toggleDocumentForm"
+              class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition shadow-sm">
+        + Добавить документ
+      </button>
+    </div>
+
+    <!-- Форма документа -->
+    <div data-sale-summary-target="documentForm" class="hidden px-6 py-4 bg-gray-50 border-b border-gray-100">
+      <%= form_with model: [ @order, Document.new ] do |f| %>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="mb-4">
+            <%= f.label :doc_type, "Тип *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.select :doc_type, doc_type_options, { include_blank: "Выберите тип..." },
+                class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+          </div>
+          <div class="mb-4">
+            <%= f.label :document_date, "Дата *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.date_field :document_date, value: Date.current,
+                class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+          </div>
+          <div class="mb-4">
+            <%= f.label :title, "Название *", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_field :title, placeholder: "Счёт №, договор №...",
+                class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+          </div>
+        </div>
+        <div class="mb-4">
+          <%= f.label :description, "Описание", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.text_field :description, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" data-action="click->sale-summary#toggleDocumentForm"
+                  class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">Отмена</button>
+          <%= f.submit "Добавить", class: "px-6 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition cursor-pointer shadow-sm" %>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @order.documents.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Тип</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Название</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата</th>
+            <th class="px-6 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @order.documents.each do |document| %>
+            <tr>
+              <td class="px-6 py-3.5 text-sm"><%= doc_type_badge(document.doc_type) %></td>
+              <td class="px-6 py-3.5 text-sm text-gray-900"><%= document.title %></td>
+              <td class="px-6 py-3.5 text-sm text-gray-600 whitespace-nowrap"><%= l(document.document_date, format: :long) if document.document_date %></td>
+              <td class="px-6 py-3.5 text-right">
+                <%= button_to "Удалить", [ @order, document ], method: :delete,
+                    class: "px-2.5 py-1.5 text-xs font-medium rounded bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer",
+                    data: { turbo_confirm: "Удалить документ «#{document.title}»?" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="px-6 py-8 text-center text-gray-400 text-sm">Документов пока нет</p>
+    <% end %>
   </div>
 
   <div class="mt-6">

@@ -1,70 +1,42 @@
 class DocumentsController < ApplicationController
-  before_action :set_document, only: %i[ show edit update destroy ]
+  before_action :set_order
+  before_action :set_document, only: %i[ destroy ]
 
-  # GET /documents or /documents.json
-  def index
-    @documents = Document.all
-  end
-
-  # GET /documents/1 or /documents/1.json
-  def show
-  end
-
-  # GET /documents/new
-  def new
-    @document = Document.new
-  end
-
-  # GET /documents/1/edit
-  def edit
-  end
-
-  # POST /documents or /documents.json
+  # POST /orders/:order_id/documents
   def create
-    @document = Document.new(document_params)
+    @document = @order.documents.build(document_params)
 
     respond_to do |format|
       if @document.save
-        format.html { redirect_to @document, notice: "Document was successfully created." }
-        format.json { render :show, status: :created, location: @document }
+        format.html { redirect_to @order, notice: "Документ добавлен." }
+        format.json { render :show, status: :created, location: @order }
       else
-        format.html { render :new, status: :unprocessable_content }
+        format.html { redirect_to @order, alert: @document.errors.full_messages.to_sentence }
         format.json { render json: @document.errors, status: :unprocessable_content }
       end
     end
   end
 
-  # PATCH/PUT /documents/1 or /documents/1.json
-  def update
-    respond_to do |format|
-      if @document.update(document_params)
-        format.html { redirect_to @document, notice: "Document was successfully updated.", status: :see_other }
-        format.json { render :show, status: :ok, location: @document }
-      else
-        format.html { render :edit, status: :unprocessable_content }
-        format.json { render json: @document.errors, status: :unprocessable_content }
-      end
-    end
-  end
-
-  # DELETE /documents/1 or /documents/1.json
+  # DELETE /orders/:order_id/documents/:id
   def destroy
     @document.destroy!
-
     respond_to do |format|
-      format.html { redirect_to documents_path, notice: "Document was successfully destroyed.", status: :see_other }
+      format.html { redirect_to @order, notice: "Документ удалён.", status: :see_other }
       format.json { head :no_content }
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_document
-      @document = Document.find(params.expect(:id))
+
+    def set_order
+      @order = Order.find(params.expect(:order_id))
     end
 
-    # Only allow a list of trusted parameters through.
+    def set_document
+      @document = @order.documents.find(params.expect(:id))
+    end
+
     def document_params
-      params.expect(document: [ :order_id, :doc_type, :title, :content, :file_path ])
+      params.expect(document: [ :doc_type, :title, :description, :document_date ])
     end
 end
