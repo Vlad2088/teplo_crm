@@ -150,13 +150,15 @@
         <span data-sale-summary-target="totalDue"><%= format_currency(@order.total_due) %></span>
       </div>
 
-      <div class="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between">
-        <%= form_with model: @order, url: order_path(@order), method: :patch, class: "flex items-center gap-2" do |f| %>
-          <%= f.label :discount_percent, "Скидка, %", class: "text-sm text-gray-600" %>
-          <%= f.number_field :discount_percent, min: 0, max: 100, step: 0.5,
-              class: "w-20 rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm",
-              data: { action: "change->sale-summary#applyDiscount" } %>
-          <%= f.submit "OK", class: "px-3 py-1.5 text-xs font-medium rounded bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer" %>
+      <div class="mt-3 pt-4 border-t border-gray-200">
+        <%= form_with model: @order, url: order_path(@order), method: :patch, class: "flex items-center justify-between gap-4" do |f| %>
+          <%= f.label :discount_percent, "Скидка, %", class: "text-base font-semibold text-gray-900" %>
+          <div class="flex items-center gap-3">
+            <%= f.number_field :discount_percent, min: 0, max: 100, step: 0.5,
+                class: "w-24 rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-base font-semibold text-right",
+                data: { action: "change->sale-summary#applyDiscount" } %>
+            <%= f.submit "OK", class: "px-6 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition cursor-pointer shadow-sm" %>
+          </div>
         <% end %>
       </div>
     </div>
