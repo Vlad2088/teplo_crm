@@ -1,7 +1,7 @@
 <%= form_with(model: order_item, class: "contents") do |form| %>
   <% if order_item.errors.any? %>
     <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
-      <h2><%= pluralize(order_item.errors.count, "error") %> prohibited this order_item from being saved:</h2>
+      <h2><%= ru_pluralize(order_item.errors.count, "ошибка", "ошибки", "ошибок") %>:</h2>
 
       <ul class="list-disc ml-6">
         <% order_item.errors.each do |error| %>

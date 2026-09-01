@@ -1,7 +1,7 @@
 <%= form_with(model: payment, class: "contents") do |form| %>
   <% if payment.errors.any? %>
     <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
-      <h2><%= pluralize(payment.errors.count, "error") %> prohibited this payment from being saved:</h2>
+      <h2><%= ru_pluralize(payment.errors.count, "ошибка", "ошибки", "ошибок") %>:</h2>
 
       <ul class="list-disc ml-6">
         <% payment.errors.each do |error| %>

@@ -1,7 +1,7 @@
 <%= form_with(model: client) do |form| %>
   <% if client.errors.any? %>
     <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-      <h3 class="text-red-800 font-semibold mb-2"><%= pluralize(client.errors.count, "ошибка", "ошибки", "ошибок") %>:</h3>
+      <h3 class="text-red-800 font-semibold mb-2"><%= ru_pluralize(client.errors.count, "ошибка", "ошибки", "ошибок") %>:</h3>
       <ul class="list-disc ml-6 text-red-700 text-sm">
         <% client.errors.each do |error| %>
           <li><%= error.full_message %></li>

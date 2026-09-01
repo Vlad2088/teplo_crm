@@ -1,7 +1,7 @@
 <%= form_with(model: service) do |form| %>
   <% if service.errors.any? %>
     <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-      <h3 class="text-red-800 font-semibold mb-2"><%= pluralize(service.errors.count, "ошибка", "ошибки", "ошибок") %>:</h3>
+      <h3 class="text-red-800 font-semibold mb-2"><%= ru_pluralize(service.errors.count, "ошибка", "ошибки", "ошибок") %>:</h3>
       <ul class="list-disc ml-6 text-red-700 text-sm">
         <% service.errors.each do |error| %>
           <li><%= error.full_message %></li>
