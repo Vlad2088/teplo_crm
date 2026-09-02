@@ -32,7 +32,8 @@ class CompanySetting < ApplicationRecord
   # Подпись в печатных формах: «ИП Иванов И.И.» или «Директор ООО Ромашка»
   def signature_caption
     if individual_enterpreneur?
-      "ИП #{director_name.presence || name}"
+      person = director_name.presence || name
+      person.start_with?("ИП") ? person : "ИП #{person}"
     else
       "#{position_title.presence || 'Руководитель'} #{short_name.presence || name}"
     end
