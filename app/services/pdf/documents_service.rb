@@ -18,6 +18,7 @@ class Pdf::DocumentsService
     when "act" then render_act
     when "invoice" then render_invoice
     when "upd" then render_upd
+    when "torg12" then render_torg12
     else render_stub
     end
   end
@@ -404,5 +405,232 @@ class Pdf::DocumentsService
         draw_header(pdf, document.doc_type.upcase)
         pdf.text "Печатная форма для этого типа документа будет добавлена позже.", color: "9CA3AF"
       end.render
+    end
+
+    # --- НАКЛАДНАЯ ТОРГ-12 (унифицированная форма, утв. Госкомстатом России 25.12.98 № 132) ---
+    # Для товаров (материалов); услуги закрываются актом.
+    def render_torg12
+      items = order.order_items.select(&:product_item?)
+
+      Prawn::Document.new(pdf_options) do |pdf|
+        setup_fonts(pdf)
+        pdf.font "DejaVu", size: 8
+
+        # Шапка формы (ОКУД)
+        pdf.text "Унифицированная форма № ТОРГ-12, утв. постановлением Госкомстата России от 25.12.98 № 132",
+                 align: :right, size: 6
+        pdf.move_down 4
+
+        # Заголовочный блок: Поставщик / Грузополучатель / Плательщик / Основание + ОКУД/ОКПО справа
+        pdf.table([
+          [ { content: "<b>Поставщик:</b> #{company_full_requisites}", inline_format: true, padding: [ 2, 4, 2, 4 ] },
+            { content: "Форма по ОКУД\n0330212\nпо ОКПО\n#{company.okpo}", align: :center } ],
+          [ { content: "<b>Грузополучатель:</b> #{client_full_requisites}", inline_format: true, padding: [ 2, 4, 2, 4 ] },
+            { content: "по ОКПО\n#{order.client&.okpo}", align: :center } ],
+          [ { content: "<b>Плательщик:</b> #{client_full_requisites}", inline_format: true, padding: [ 2, 4, 2, 4 ] },
+            { content: "по ОКПО\n#{order.client&.okpo}", align: :center } ],
+          [ { content: "<b>Основание:</b> #{order_basis}", inline_format: true, padding: [ 2, 4, 2, 4 ] },
+            { content: "" } ]
+        ], width: pdf.bounds.width, cell_style: { border_width: 0.5, border_color: "000000", size: 7 }) do |t|
+          t.column(1).width = 110
+        end
+
+        pdf.move_down 6
+
+        # Номер и дата
+        pdf.table([
+          [ { content: "Номер документа", align: :center }, { content: "Дата составления", align: :center } ],
+          [ { content: doc_number.presence || "—", align: :center, size: 9, font_style: :bold },
+            { content: format_date_torg(doc_date), align: :center, size: 9, font_style: :bold } ]
+        ], width: pdf.bounds.width, cell_style: { border_width: 0.5, border_color: "000000", size: 7 }) do |t|
+          t.columns(0..1).width = pdf.bounds.width / 2
+        end
+
+        pdf.move_down 10
+        pdf.text "ТОВАРНАЯ НАКЛАДНАЯ", align: :center, size: 13, style: :bold
+        pdf.move_down 10
+
+        # Табличная часть (10 колонок)
+        header = [ "\u2116", "Наименование товара", "Код", "Ед. изм.", "Код ОКЕИ", "Кол-во",
+                   "Цена, \u20bd", "Сумма без НДС", "НДС", "Сумма с НДС" ]
+        data = [ header ]
+        items.each_with_index do |item, i|
+          product = item.item
+          unit = product.unit.to_s
+          data << [
+            (i + 1).to_s,
+            product.name.to_s,
+            product.sku.to_s,
+            unit,
+            okei_code(unit),
+            format_qty(item.quantity),
+            money(item.unit_price),
+            money(item.total_price),
+            "Без НДС",
+            money(item.total_price)
+          ]
+        end
+        items_total = items.sum(&:total_price)
+        data << [ { content: "Итого", colspan: 7, align: :right, font_style: :bold },
+                  { content: money(items_total), align: :right, font_style: :bold },
+                  { content: "Х", align: :center },
+                  { content: money(items_total), align: :right, font_style: :bold } ]
+
+        pdf.table(data, width: pdf.bounds.width, header: true, cell_style: { border_width: 0.5, border_color: "000000", size: 7, padding: [ 3, 3, 3, 3 ] }) do |t|
+          t.row(0).font_style = :bold
+          t.columns(0).width = 20
+          t.columns(2).width = 42
+          t.columns(3).width = 40
+          t.columns(4).width = 38
+          t.columns(5).width = 38
+          t.columns(6).width = 62
+          t.columns(7).width = 68
+          t.columns(8).width = 42
+          t.columns(9).width = 68
+          t.columns(0).align = :center
+          t.columns(2..9).align = :right
+          t.columns(3..4).align = :center
+        end
+
+        # Итоги: суммы прописью, скидка
+        total_due = order.discount_percent.to_d > 0 ? items_total * (1 - order.discount_percent / 100) : items_total
+        pdf.move_down 8
+        pdf.font "DejaVu", size: 8 do
+          pdf.text "Всего отпущено на сумму: <b>#{amount_in_words(total_due)}</b>", inline_format: true
+          pdf.move_down 2
+          if order.discount_percent.to_d > 0
+            pdf.text "Сумма по позициям: #{money(items_total)}; скидка #{format_qty(order.discount_percent)}% учтена в итоговой сумме."
+          end
+          pdf.text "НДС: Без НДС (п. 2 ст. 346.11 НК РФ)"
+        end
+
+        # Подписи
+        pdf.move_down 24
+        pdf.font "DejaVu", size: 8 do
+          draw_sign_row(pdf, "Отпуск груза разрешил", company.position_title.to_s, company.short_name.to_s)
+          pdf.move_down 14
+          draw_sign_row(pdf, "Отпуск груза произвел", company.position_title.to_s, company.short_name.to_s)
+          pdf.move_down 14
+          draw_sign_row(pdf, "Груз получил грузополучатель", "", order.client&.display_name.to_s)
+          pdf.move_down 14
+          pdf.draw_text "М.П.", at: [ 0, pdf.cursor ]
+          pdf.draw_text "\"#{doc_date.day}\" #{month_genitive(doc_date.month)} #{doc_date.year} года", at: [ 150, pdf.cursor ]
+        end
+      end.render
+    end
+
+    # Полные реквизиты компании одной строкой (для ТОРГ-12)
+    def company_full_requisites
+      parts = [ company.name, "ИНН #{company.inn}" ]
+      parts << company.address if company.address.present?
+      parts << "тел.: #{company.phone}" if company.phone.present?
+      parts << "р/с #{company.bank_account}" if company.bank_account.present?
+      parts << "в банке #{company.bank_name}" if company.bank_name.present?
+      parts << "БИК #{company.bank_bik}" if company.bank_bik.present?
+      parts << "к/с #{company.bank_corr_account}" if company.bank_corr_account.present?
+      parts.join(", ")
+    end
+
+    # Полные реквизиты клиента одной строкой
+    def client_full_requisites
+      client = order.client
+      return "" unless client
+
+      parts = [ client.display_name ]
+      parts << "ИНН #{client.inn}" if client.inn.present?
+      addr = client.registration_address.presence || client.address.presence
+      parts << addr if addr
+      parts << "тел.: #{client.phone}" if client.phone.present?
+      parts << "р/с #{client.bank_account}" if client.bank_account.present?
+      parts << "в банке #{client.bank_name}" if client.bank_name.present?
+      parts << "БИК #{client.bank_bik}" if client.bank_bik.present?
+      parts << "к/с #{client.bank_corr_account}" if client.bank_corr_account.present?
+      parts.compact.join(", ")
+    end
+
+    # Строка подписи: должность + подпись + расшифровка
+    def draw_sign_row(pdf, label, position, name)
+      y = pdf.cursor
+      pdf.draw_text label, at: [ 0, y ]
+      pdf.draw_text position, at: [ 160, y ] if position.present?
+      pdf.stroke_horizontal_line 240, 360, at: y - 2
+      pdf.draw_text name, at: [ 365, y ]
+    end
+
+    # Основание (договор/заказ)
+    def order_basis
+      "Заказ \u2116#{order.id} от #{format_date_torg(order.created_at.to_date)}"
+    end
+
+    # Код ОКЕИ по единице измерения
+    def okei_code(unit)
+      { "шт" => "796", "\u043c\u00b2" => "055", "м" => "006", "м.кв." => "055" }.fetch(unit, "")
+    end
+
+    # Дата в формате ТОРГ-12 (05.06.2026)
+    def format_date_torg(date)
+      date.strftime("%d.%m.%Y")
+    end
+
+    # Название месяца в родительном падеже
+    def month_genitive(month)
+      %w[января февраля марта апреля мая июня июля августа сентября октября ноября декабря][month - 1]
+    end
+
+    # Сумма прописью: рубли и копейки
+    def amount_in_words(value)
+      rubles = value.to_i
+      kopecks = ((value - rubles) * 100).round
+      rub_words = amount_rubles_in_words(rubles)
+      kop_words = kopecks == 1 ? "копейка" : [ 2, 3, 4 ].include?(kopecks % 10) && ![ 12, 13, 14 ].include?(kopecks % 100) ? "копейки" : "копеек"
+      "#{rub_words} #{kopecks} #{kop_words}"
+    end
+
+    RUB_ONES = %w[ноль один два три четыре пять шесть семь восемь девять].freeze
+    RUB_ONES_F = %w[ноль одна две три четыре пять шесть семь восемь девять].freeze
+    RUB_TEENS = %w[десять одиннадцать двенадцать тринадцать четырнадцать пятнадцать шестнадцать семнадцать восемнадцать девятнадцать].freeze
+    RUB_TENS = %w[x десять двадцать тридцать сорок пятьдесят шестьдесят семьдесят восемьдесят девяносто].freeze
+    RUB_HUNDREDS = %w[x сто двести триста четыреста пятьсот шестьсот семьсот восемьсот девятьсот].freeze
+
+    def amount_rubles_in_words(rubles)
+      return "Ноль рублей" if rubles.zero?
+
+      parts = []
+      rest = rubles
+      [ [ 1_000_000, "миллион", "миллиона", "миллионов" ], [ 1000, "тысяча", "тысячи", "тысяч" ] ].each do |base, one, few, many|
+        n = rest / base
+        next if n.zero?
+
+        rest -= n * base
+        parts << triple_in_words(n, base == 1000)
+        parts << plural_form(n, one, few, many)
+      end
+      parts << triple_in_words(rest, false) if rest.positive?
+      parts << plural_form(rubles, "рубль", "рубля", "рублей")
+      parts.join(" ").capitalize
+    end
+
+    def triple_in_words(n, female)
+      parts = []
+      parts << RUB_HUNDREDS[n / 100] if n >= 100
+      tt = n % 100
+      if tt >= 10 && tt < 20
+        parts << RUB_TEENS[tt - 10]
+      else
+        parts << RUB_TENS[tt / 10] if tt >= 20
+        o = tt % 10
+        parts << (female ? RUB_ONES_F[o] : RUB_ONES[o]) if o.positive?
+      end
+      parts.join(" ")
+    end
+
+    def plural_form(n, one, few, many)
+      n100 = n % 100
+      n10 = n % 10
+      if n100.between?(11, 14) then many
+      elsif n10 == 1 then one
+      elsif n10.between?(2, 4) then few
+      else many
+      end
     end
 end
