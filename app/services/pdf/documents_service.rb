@@ -548,40 +548,47 @@ class Pdf::DocumentsService
           pdf.text "НДС: Без НДС (п. 2 ст. 346.11 НК РФ)", size: 6.5
         end
 
-        # Подписи: должность / подпись / расшифровка + М.П.
-        pdf.move_down 18
+        # Подписи: два блока без рамок — слева грузоотправитель, справа грузополучатель
+        pdf.move_down 22
         pos = company.position_title.to_s
         ini = signature_initials
         cli_name = order.client&.display_name.to_s
-        sign_widths = [ 85, 100, 55, 80, 90, 55, 80 ]
-        sign_scale = full_w.to_f / sign_widths.sum
-        sign_widths = sign_widths.map { |w| w * sign_scale }
-        pdf.table([
-          [ { content: "Отпуск груза разрешил" }, { content: pos }, { content: "" }, { content: ini },
-            { content: "Главный (старший) бухгалтер" }, { content: "" }, { content: ini } ],
-          [ { content: "(должность)", size: 5, border_width: 0 }, { content: "(подпись)", size: 5, border_width: 0 },
-            { content: "(подпись)", size: 5, border_width: 0 }, { content: "(расшифровка подписи)", size: 5, border_width: 0 },
-            { content: "", size: 5, border_width: 0 }, { content: "(подпись)", size: 5, border_width: 0 },
-            { content: "(расшифровка подписи)", size: 5, border_width: 0 } ],
-          [ { content: "Отпуск груза произвел" }, { content: pos }, { content: "" }, { content: ini },
-            { content: "Груз принял" }, { content: "" }, { content: "" } ],
-          [ { content: "(должность)", size: 5, border_width: 0 }, { content: "(подпись)", size: 5, border_width: 0 },
-            { content: "(подпись)", size: 5, border_width: 0 }, { content: "(расшифровка подписи)", size: 5, border_width: 0 },
-            { content: "(должность)", size: 5, border_width: 0 }, { content: "(подпись)", size: 5, border_width: 0 },
-            { content: "(расшифровка подписи)", size: 5, border_width: 0 } ],
-          [ { content: "Груз получил грузополучатель" }, { content: "" }, { content: "" }, { content: cli_name },
-            { content: "" }, { content: "" }, { content: "" } ]
-        ], width: full_w, cell_style: { border_width: 0.5, border_color: "000000", size: 7, padding: [ 4, 3, 4, 3 ] }) do |t|
-          sign_widths.each_with_index { |w, ci| t.column(ci).width = w }
-        end
+        left_w = (full_w * 0.55).round
+        right_x = left_w + 24
+        right_w = full_w - right_x
+        top_y = pdf.cursor
 
-        pdf.move_down 10
         pdf.font "DejaVu", size: 7 do
-          pdf.draw_text "М.П.  \"#{doc_date.day}\" #{month_genitive(doc_date.month)} #{doc_date.year} года", at: [ 0, pdf.cursor ]
-          pdf.draw_text "М.П.  \"____\" ______________ 20____ года", at: [ pdf.bounds.right - 190, pdf.cursor ]
+          # Левый блок — грузоотправитель
+          pdf.bounding_box([ 0, top_y ], width: left_w) do
+            torg_sign_line(pdf, "Отпуск груза разрешил", pos, ini,
+                           pos_x: 118, line_from: 245, line_to: 330, name_x: 338)
+            pdf.move_down 18
+            torg_sign_line(pdf, "Главный (старший) бухгалтер", "", ini,
+                           pos_x: 118, line_from: 245, line_to: 330, name_x: 338, position_caption: false)
+            pdf.move_down 18
+            torg_sign_line(pdf, "Отпуск груза произвел", pos, ini,
+                           pos_x: 118, line_from: 245, line_to: 330, name_x: 338)
+            pdf.move_down 26
+            pdf.draw_text "М.П.", at: [ 0, pdf.cursor ]
+            pdf.draw_text "\"#{doc_date.day}\" #{month_genitive(doc_date.month)} #{doc_date.year} года", at: [ 45, pdf.cursor ]
+          end
+
+          # Правый блок — грузополучатель (клиент)
+          pdf.bounding_box([ right_x, top_y ], width: right_w) do
+            torg_sign_line(pdf, "Груз принял", "", "",
+                           pos_x: 150, line_from: 150, line_to: 235, name_x: 243, position_caption: false)
+            pdf.move_down 18
+            torg_sign_line(pdf, "Груз получил грузополучатель", "", cli_name,
+                           pos_x: 150, line_from: 150, line_to: 235, name_x: 243, position_caption: false)
+            pdf.move_down 44
+            pdf.draw_text "М.П.", at: [ 0, pdf.cursor ]
+            pdf.draw_text "\"____\" ______________ 20____ года", at: [ 45, pdf.cursor ]
+          end
         end
       end.render
     end
+
 
     # Сумма без знака валюты (для табличных граф ТОРГ-12)
     def money_plain(value)
@@ -597,6 +604,20 @@ class Pdf::DocumentsService
       return company.short_name.to_s if parts.size < 2
 
       "#{parts[0]} #{parts[1..].map { |p| "#{p[0]}." }.join(' ')}"
+    end
+
+    # Строка подписи ТОРГ-12 без рамок: label + должность + линия подписи + расшифровка
+    def torg_sign_line(pdf, label, position, name, pos_x:, line_from:, line_to:, name_x:, position_caption: true)
+      y = pdf.cursor
+      pdf.draw_text label, at: [ 0, y ]
+      pdf.draw_text position, at: [ pos_x, y ] if position.present?
+      pdf.stroke_horizontal_line line_from, line_to, at: y - 2
+      pdf.draw_text name, at: [ name_x, y ] if name.present?
+      pdf.font "DejaVu", size: 5 do
+        pdf.draw_text "(должность)", at: [ pos_x, y - 9 ] if position_caption
+        pdf.draw_text "(подпись)", at: [ line_from + 20, y - 9 ]
+        pdf.draw_text "(расшифровка подписи)", at: [ name_x, y - 9 ]
+      end
     end
 
     # Полные реквизиты компании одной строкой (для ТОРГ-12)
