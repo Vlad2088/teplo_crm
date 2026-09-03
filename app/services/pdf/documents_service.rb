@@ -407,52 +407,82 @@ class Pdf::DocumentsService
       end.render
     end
 
-    # --- НАКЛАДНАЯ ТОРГ-12 (унифицированная форма, утв. Госкомстатом России 25.12.98 № 132) ---
+    # --- НАКЛАДНАЯ ТОРГ-12 (унифицированная форма № 0330212, утв. Госкомстатом России 25.12.98 № 132) ---
+    # Точная унифицированная форма: шапка с кодами, 15 граф, Итого/Всего по накладной,
+    # реквизиты прописью, подписи с подстрочниками, М.П. обеих сторон.
     # Для товаров (материалов); услуги закрываются актом.
     def render_torg12
       items = order.order_items.select(&:product_item?)
 
-      Prawn::Document.new(pdf_options) do |pdf|
+      Prawn::Document.new(page_size: "A4", margin: [ 25, 18, 25, 18 ]) do |pdf|
         setup_fonts(pdf)
-        pdf.font "DejaVu", size: 8
+        pdf.font "DejaVu", size: 7
+        full_w = pdf.bounds.width
 
-        # Шапка формы (ОКУД)
-        pdf.text "Унифицированная форма № ТОРГ-12, утв. постановлением Госкомстата России от 25.12.98 № 132",
-                 align: :right, size: 6
-        pdf.move_down 4
+        # Правый верхний колонтитул формы
+        pdf.text "Унифицированная форма № ТОРГ-12", align: :right, size: 7
+        pdf.text "Утверждена постановлением Госкомстата России от 25.12.98 № 132", align: :right, size: 6
+        pdf.move_down 2
 
-        # Заголовочный блок: Поставщик / Грузополучатель / Плательщик / Основание + ОКУД/ОКПО справа
+        # Заголовочный блок: реквизиты сторон слева, коды справа
+        client_okpo = order.client&.okpo.to_s
         pdf.table([
-          [ { content: "<b>Поставщик:</b> #{company_full_requisites}", inline_format: true, padding: [ 2, 4, 2, 4 ] },
-            { content: "Форма по ОКУД\n0330212\nпо ОКПО\n#{company.okpo}", align: :center } ],
-          [ { content: "<b>Грузополучатель:</b> #{client_full_requisites}", inline_format: true, padding: [ 2, 4, 2, 4 ] },
-            { content: "по ОКПО\n#{order.client&.okpo}", align: :center } ],
-          [ { content: "<b>Плательщик:</b> #{client_full_requisites}", inline_format: true, padding: [ 2, 4, 2, 4 ] },
-            { content: "по ОКПО\n#{order.client&.okpo}", align: :center } ],
-          [ { content: "<b>Основание:</b> #{order_basis}", inline_format: true, padding: [ 2, 4, 2, 4 ] },
-            { content: "" } ]
-        ], width: pdf.bounds.width, cell_style: { border_width: 0.5, border_color: "000000", size: 7 }) do |t|
-          t.column(1).width = 110
+          [ { content: "<b>Грузоотправитель:</b> #{company_full_requisites}\n(организация-грузоотправитель, адрес, телефон, факс, банковские реквизиты)", inline_format: true },
+            { content: "Коды\n\nФорма\nпо ОКУД\n\n0330212", align: :center } ],
+          [ { content: "<b>Структурное подразделение:</b> Основной склад", inline_format: true },
+            { content: "Вид деятельности\nпо ОКДП\n\n#{company.okved}", align: :center } ],
+          [ { content: "<b>Грузополучатель:</b> #{client_full_requisites}\n(организация, адрес, телефон, факс, банковские реквизиты)", inline_format: true },
+            { content: "по ОКПО\n\n#{client_okpo}", align: :center } ],
+          [ { content: "<b>Поставщик:</b> #{company_full_requisites}\n(организация, адрес, телефон, факс, банковские реквизиты)", inline_format: true },
+            { content: "по ОКПО\n\n#{company.okpo}", align: :center } ],
+          [ { content: "<b>Плательщик:</b> #{client_full_requisites}\n(организация, адрес, телефон, факс, банковские реквизиты)", inline_format: true },
+            { content: "по ОКПО\n\n#{client_okpo}", align: :center } ],
+          [ { content: "<b>Основание:</b> #{order_basis}\n(договор, заказ-наряд)", inline_format: true },
+            { content: "номер\n\nдата", align: :center } ]
+        ], width: full_w, cell_style: { border_width: 0.5, border_color: "000000", size: 6.5, padding: [ 3, 4, 3, 4 ] }) do |t|
+          t.column(1).width = 100
         end
 
         pdf.move_down 6
 
-        # Номер и дата
+        # Номер / дата / транспортная накладная + заголовок
+        title_w = 160
+        rest_w = (full_w - title_w) / 4
         pdf.table([
-          [ { content: "Номер документа", align: :center }, { content: "Дата составления", align: :center } ],
+          [ { content: "ТОВАРНАЯ НАКЛАДНАЯ", rowspan: 2, align: :center, valign: :center, size: 10, font_style: :bold },
+            { content: "Номер документа", align: :center },
+            { content: "Дата составления", align: :center },
+            { content: "Транспортная накладная: номер", align: :center },
+            { content: "дата", align: :center } ],
           [ { content: doc_number.presence || "—", align: :center, size: 9, font_style: :bold },
-            { content: format_date_torg(doc_date), align: :center, size: 9, font_style: :bold } ]
-        ], width: pdf.bounds.width, cell_style: { border_width: 0.5, border_color: "000000", size: 7 }) do |t|
-          t.columns(0..1).width = pdf.bounds.width / 2
+            { content: format_date_torg(doc_date), align: :center, size: 9, font_style: :bold },
+            { content: "—" },
+            { content: "—" } ]
+        ], width: full_w, cell_style: { border_width: 0.5, border_color: "000000", size: 6.5, padding: [ 3, 3, 3, 3 ] }) do |t|
+          t.column(0).width = title_w
+          t.columns(1..4).width = rest_w
         end
 
-        pdf.move_down 10
-        pdf.text "ТОВАРНАЯ НАКЛАДНАЯ", align: :center, size: 13, style: :bold
-        pdf.move_down 10
+        pdf.move_down 8
 
-        # Табличная часть (10 колонок)
-        header = [ "\u2116", "Наименование товара", "Код", "Ед. изм.", "Код ОКЕИ", "Кол-во",
-                   "Цена, \u20bd", "Сумма без НДС", "НДС", "Сумма с НДС" ]
+        # Табличная часть — 15 граф унифицированной формы (шапка одной строкой, без spans)
+        header = [
+          "Номер по порядку",
+          "Товар: наименование, характеристика, сорт, артикул",
+          "Код",
+          "Ед. изм.: код по ОКЕИ",
+          "Ед. изм.: наиме-нование",
+          "Вид упа-ковки",
+          "Коли-чество в одном месте",
+          "Мест, штук",
+          "Мас-са брут-то",
+          "Коли-чество (мас-са нет-то)",
+          "Цена, руб. коп.",
+          "Сумма без учета НДС, руб. коп.",
+          "НДС: ставка, %",
+          "НДС: сумма, руб. коп.",
+          "Сумма с уче-том НДС, руб. коп."
+        ]
         data = [ header ]
         items.each_with_index do |item, i|
           product = item.item
@@ -461,62 +491,112 @@ class Pdf::DocumentsService
             (i + 1).to_s,
             product.name.to_s,
             product.sku.to_s,
-            unit,
             okei_code(unit),
+            unit,
+            "—",
+            "—",
             format_qty(item.quantity),
-            money(item.unit_price),
-            money(item.total_price),
+            "—",
+            format_qty(item.quantity),
+            money_plain(item.unit_price),
+            money_plain(item.total_price),
             "Без НДС",
-            money(item.total_price)
+            "—",
+            money_plain(item.total_price)
           ]
         end
-        items_total = items.sum(&:total_price)
-        data << [ { content: "Итого", colspan: 7, align: :right, font_style: :bold },
-                  { content: money(items_total), align: :right, font_style: :bold },
-                  { content: "Х", align: :center },
-                  { content: money(items_total), align: :right, font_style: :bold } ]
 
-        pdf.table(data, width: pdf.bounds.width, header: true, cell_style: { border_width: 0.5, border_color: "000000", size: 7, padding: [ 3, 3, 3, 3 ] }) do |t|
+        qty_sum = items.sum(&:quantity)
+        sum_total = items.sum(&:total_price)
+        total_due = order.discount_percent.to_d > 0 ? sum_total * (1 - order.discount_percent / 100) : sum_total
+        bold_r = { font_style: :bold, align: :right }
+        data << [ { content: "Итого", colspan: 7, **bold_r },
+                  format_qty(qty_sum), "Х", format_qty(qty_sum), "Х",
+                  { content: money_plain(sum_total), **bold_r }, "Х", "Х",
+                  { content: money_plain(sum_total), **bold_r } ]
+        data << [ { content: "Всего по накладной", colspan: 7, **bold_r },
+                  format_qty(qty_sum), "Х", format_qty(qty_sum), "Х",
+                  { content: money_plain(sum_total), **bold_r }, "Х", "Х",
+                  { content: money_plain(sum_total), **bold_r } ]
+
+        col_widths = [ 18, 96, 38, 26, 28, 24, 26, 26, 24, 28, 42, 50, 28, 28, 50 ]
+        scale = full_w.to_f / col_widths.sum
+        col_widths = col_widths.map { |w| w * scale }
+        pdf.table(data, width: full_w, cell_style: { border_width: 0.5, border_color: "000000", size: 6, padding: [ 2, 2, 2, 2 ] }) do |t|
           t.row(0).font_style = :bold
-          t.columns(0).width = 20
-          t.columns(2).width = 42
-          t.columns(3).width = 40
-          t.columns(4).width = 38
-          t.columns(5).width = 38
-          t.columns(6).width = 62
-          t.columns(7).width = 68
-          t.columns(8).width = 42
-          t.columns(9).width = 68
+          t.row(0).size = 5.5
+          col_widths.each_with_index { |w, ci| t.column(ci).width = w }
           t.columns(0).align = :center
-          t.columns(2..9).align = :right
-          t.columns(3..4).align = :center
+          t.columns(2..14).align = :right
+          t.columns(3..8).align = :center
         end
 
-        # Итоги: суммы прописью, скидка
-        total_due = order.discount_percent.to_d > 0 ? items_total * (1 - order.discount_percent / 100) : items_total
-        pdf.move_down 8
-        pdf.font "DejaVu", size: 8 do
-          pdf.text "Всего отпущено на сумму: <b>#{amount_in_words(total_due)}</b>", inline_format: true
-          pdf.move_down 2
+        # Подтабличный блок: приложение, записей прописью, массы, доверенность, сумма прописью
+        pdf.move_down 6
+        pdf.font "DejaVu", size: 7 do
+          count_words = triple_in_words(items.size, false).capitalize
+          pdf.text "Товарная накладная имеет приложение на ______ листах"
+          pdf.text "и содержит #{count_words} порядковых номеров записей"
+          pdf.text "Всего мест ________________            Масса груза (нетто) ________________"
+          pdf.text "Масса груза (брутто) ________________"
+          pdf.text "Приложение (паспорта, сертификаты и т.п.) на ______ листах            По доверенности № ________ от ______________"
+          pdf.move_down 4
+          pdf.text "Всего отпущено на сумму <b>#{amount_in_words(total_due)}</b>", inline_format: true, size: 8
           if order.discount_percent.to_d > 0
-            pdf.text "Сумма по позициям: #{money(items_total)}; скидка #{format_qty(order.discount_percent)}% учтена в итоговой сумме."
+            pdf.text "Сумма по позициям: #{money(sum_total)}; скидка #{format_qty(order.discount_percent)}% учтена в итоговой сумме.", size: 6.5
           end
-          pdf.text "НДС: Без НДС (п. 2 ст. 346.11 НК РФ)"
+          pdf.text "НДС: Без НДС (п. 2 ст. 346.11 НК РФ)", size: 6.5
         end
 
-        # Подписи
-        pdf.move_down 24
-        pdf.font "DejaVu", size: 8 do
-          draw_sign_row(pdf, "Отпуск груза разрешил", company.position_title.to_s, company.short_name.to_s)
-          pdf.move_down 14
-          draw_sign_row(pdf, "Отпуск груза произвел", company.position_title.to_s, company.short_name.to_s)
-          pdf.move_down 14
-          draw_sign_row(pdf, "Груз получил грузополучатель", "", order.client&.display_name.to_s)
-          pdf.move_down 14
-          pdf.draw_text "М.П.", at: [ 0, pdf.cursor ]
-          pdf.draw_text "\"#{doc_date.day}\" #{month_genitive(doc_date.month)} #{doc_date.year} года", at: [ 150, pdf.cursor ]
+        # Подписи: должность / подпись / расшифровка + М.П.
+        pdf.move_down 18
+        pos = company.position_title.to_s
+        ini = signature_initials
+        cli_name = order.client&.display_name.to_s
+        sign_widths = [ 85, 100, 55, 80, 90, 55, 80 ]
+        sign_scale = full_w.to_f / sign_widths.sum
+        sign_widths = sign_widths.map { |w| w * sign_scale }
+        pdf.table([
+          [ { content: "Отпуск груза разрешил" }, { content: pos }, { content: "" }, { content: ini },
+            { content: "Главный (старший) бухгалтер" }, { content: "" }, { content: ini } ],
+          [ { content: "(должность)", size: 5, border_width: 0 }, { content: "(подпись)", size: 5, border_width: 0 },
+            { content: "(подпись)", size: 5, border_width: 0 }, { content: "(расшифровка подписи)", size: 5, border_width: 0 },
+            { content: "", size: 5, border_width: 0 }, { content: "(подпись)", size: 5, border_width: 0 },
+            { content: "(расшифровка подписи)", size: 5, border_width: 0 } ],
+          [ { content: "Отпуск груза произвел" }, { content: pos }, { content: "" }, { content: ini },
+            { content: "Груз принял" }, { content: "" }, { content: "" } ],
+          [ { content: "(должность)", size: 5, border_width: 0 }, { content: "(подпись)", size: 5, border_width: 0 },
+            { content: "(подпись)", size: 5, border_width: 0 }, { content: "(расшифровка подписи)", size: 5, border_width: 0 },
+            { content: "(должность)", size: 5, border_width: 0 }, { content: "(подпись)", size: 5, border_width: 0 },
+            { content: "(расшифровка подписи)", size: 5, border_width: 0 } ],
+          [ { content: "Груз получил грузополучатель" }, { content: "" }, { content: "" }, { content: cli_name },
+            { content: "" }, { content: "" }, { content: "" } ]
+        ], width: full_w, cell_style: { border_width: 0.5, border_color: "000000", size: 7, padding: [ 4, 3, 4, 3 ] }) do |t|
+          sign_widths.each_with_index { |w, ci| t.column(ci).width = w }
+        end
+
+        pdf.move_down 10
+        pdf.font "DejaVu", size: 7 do
+          pdf.draw_text "М.П.  \"#{doc_date.day}\" #{month_genitive(doc_date.month)} #{doc_date.year} года", at: [ 0, pdf.cursor ]
+          pdf.draw_text "М.П.  \"____\" ______________ 20____ года", at: [ pdf.bounds.right - 190, pdf.cursor ]
         end
       end.render
+    end
+
+    # Сумма без знака валюты (для табличных граф ТОРГ-12)
+    def money_plain(value)
+      ActionController::Base.helpers.number_to_currency(value, unit: "", precision: 2, delimiter: " ")&.strip
+    rescue StandardError
+      value.to_s
+    end
+
+    # Расшифровка подписи: «Ганиев В. Р.» из полного ФИО
+    def signature_initials
+      source = company.director_name.presence || company.name
+      parts = source.to_s.split
+      return company.short_name.to_s if parts.size < 2
+
+      "#{parts[0]} #{parts[1..].map { |p| "#{p[0]}." }.join(' ')}"
     end
 
     # Полные реквизиты компании одной строкой (для ТОРГ-12)
@@ -546,15 +626,6 @@ class Pdf::DocumentsService
       parts << "БИК #{client.bank_bik}" if client.bank_bik.present?
       parts << "к/с #{client.bank_corr_account}" if client.bank_corr_account.present?
       parts.compact.join(", ")
-    end
-
-    # Строка подписи: должность + подпись + расшифровка
-    def draw_sign_row(pdf, label, position, name)
-      y = pdf.cursor
-      pdf.draw_text label, at: [ 0, y ]
-      pdf.draw_text position, at: [ 160, y ] if position.present?
-      pdf.stroke_horizontal_line 240, 360, at: y - 2
-      pdf.draw_text name, at: [ 365, y ]
     end
 
     # Основание (договор/заказ)
