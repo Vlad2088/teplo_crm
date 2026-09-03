@@ -414,7 +414,7 @@ class Pdf::DocumentsService
     def render_torg12
       items = order.order_items.select(&:product_item?)
 
-      Prawn::Document.new(page_size: "A4", margin: [ 25, 18, 25, 18 ]) do |pdf|
+      Prawn::Document.new(page_size: "A4", page_layout: :landscape, margin: [ 22, 20, 22, 20 ]) do |pdf|
         setup_fonts(pdf)
         pdf.font "DejaVu", size: 7
         full_w = pdf.bounds.width
@@ -519,12 +519,12 @@ class Pdf::DocumentsService
                   { content: money_plain(sum_total), **bold_r }, "Х", "Х",
                   { content: money_plain(sum_total), **bold_r } ]
 
-        col_widths = [ 18, 96, 38, 26, 28, 24, 26, 26, 24, 28, 42, 50, 28, 28, 50 ]
+        col_widths = [ 24, 90, 38, 26, 28, 24, 26, 26, 24, 28, 42, 50, 28, 28, 50 ]
         scale = full_w.to_f / col_widths.sum
         col_widths = col_widths.map { |w| w * scale }
-        pdf.table(data, width: full_w, cell_style: { border_width: 0.5, border_color: "000000", size: 6, padding: [ 2, 2, 2, 2 ] }) do |t|
+        pdf.table(data, width: full_w, cell_style: { border_width: 0.5, border_color: "000000", size: 7, padding: [ 2, 2, 2, 2 ] }) do |t|
           t.row(0).font_style = :bold
-          t.row(0).size = 5.5
+          t.row(0).size = 6
           col_widths.each_with_index { |w, ci| t.column(ci).width = w }
           t.columns(0).align = :center
           t.columns(2..14).align = :right
