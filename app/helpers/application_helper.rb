@@ -48,6 +48,16 @@ module ApplicationHelper
     "torg12" => "Накладная ТОРГ-12"
   }.freeze
 
+  # Короткие подписи для бейджей в таблицах
+  DOC_TYPE_BADGE_NAMES = {
+    "estimate" => "Смета",
+    "invoice" => "Счет",
+    "act" => "Акт",
+    "contract" => "Договор",
+    "upd" => "УПД",
+    "torg12" => "ТОРГ-12"
+  }.freeze
+
   PAYMENT_TYPE_NAMES = {
     "cash" => "Наличные",
     "cashless" => "Безналичные"
@@ -127,7 +137,7 @@ module ApplicationHelper
   # Бадж типа документа
   def doc_type_badge(doc_type)
     colors = { "estimate" => "bg-indigo-100 text-indigo-700", "invoice" => "bg-blue-100 text-blue-700", "act" => "bg-green-100 text-green-700", "contract" => "bg-purple-100 text-purple-700", "upd" => "bg-teal-100 text-teal-700", "torg12" => "bg-amber-100 text-amber-700" }
-    tag.span DOC_TYPE_NAMES[doc_type] || doc_type, class: "px-2 py-1 text-xs font-medium rounded-full #{colors[doc_type] || 'bg-gray-100 text-gray-600'}"
+    tag.span DOC_TYPE_BADGE_NAMES[doc_type] || doc_type, class: "px-2 py-1 text-xs font-medium rounded-full #{colors[doc_type] || 'bg-gray-100 text-gray-600'}"
   end
 
   # Бадж типа оплаты

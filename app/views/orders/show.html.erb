@@ -319,12 +319,15 @@
               <td class="px-6 py-3.5 text-sm text-gray-900"><%= document.title %></td>
               <td class="px-6 py-3.5 text-sm text-gray-600 whitespace-nowrap"><%= l(document.document_date, format: :long) if document.document_date %></td>
               <td class="px-6 py-3.5 text-right whitespace-nowrap">
-                <%= link_to "PDF", pdf_order_document_path(@order, document),
-                    class: "px-2.5 py-1.5 text-xs font-medium rounded bg-orange-50 text-orange-600 hover:bg-orange-100 transition mr-1",
-                    target: "_blank", rel: "noopener" %>
-                <%= button_to "Удалить", [ @order, document ], method: :delete,
-                    class: "px-2.5 py-1.5 text-xs font-medium rounded bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer",
-                    data: { turbo_confirm: "Удалить документ «#{document.title}»?" } %>
+                <div class="flex items-center justify-end gap-2">
+                  <%= link_to "PDF", pdf_order_document_path(@order, document),
+                      class: "px-2.5 py-1.5 text-xs font-medium rounded bg-orange-50 text-orange-600 hover:bg-orange-100 transition",
+                      target: "_blank", rel: "noopener" %>
+                  <%= button_to "Удалить", [ @order, document ], method: :delete,
+                      form: { class: "inline" },
+                      class: "px-2.5 py-1.5 text-xs font-medium rounded bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer",
+                      data: { turbo_confirm: "Удалить документ «#{document.title}»?" } %>
+                </div>
               </td>
             </tr>
           <% end %>
