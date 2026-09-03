@@ -539,7 +539,7 @@ class Pdf::DocumentsService
           pdf.text "и содержит #{count_words} порядковых номеров записей"
           pdf.text "Всего мест ________________            Масса груза (нетто) ________________"
           pdf.text "Масса груза (брутто) ________________"
-          pdf.text "Приложение (паспорта, сертификаты и т.п.) на ______ листах            По доверенности № ________ от ______________"
+          pdf.text "Приложение (паспорта, сертификаты и т.п.) на ______ листах"
           pdf.move_down 4
           pdf.text "Всего отпущено на сумму <b>#{amount_in_words(total_due)}</b>", inline_format: true, size: 8
           if order.discount_percent.to_d > 0
@@ -552,7 +552,6 @@ class Pdf::DocumentsService
         pdf.move_down 22
         pos = company.position_title.to_s
         ini = signature_initials
-        cli_name = order.client&.display_name.to_s
         left_w = (full_w * 0.55).round
         right_x = left_w + 24
         right_w = full_w - right_x
@@ -579,9 +578,11 @@ class Pdf::DocumentsService
             torg_sign_line(pdf, "Груз принял", "", "",
                            pos_x: 150, line_from: 150, line_to: 235, name_x: 243, position_caption: false)
             pdf.move_down 18
-            torg_sign_line(pdf, "Груз получил грузополучатель", "", cli_name,
+            torg_sign_line(pdf, "Груз получил грузополучатель", "", "",
                            pos_x: 150, line_from: 150, line_to: 235, name_x: 243, position_caption: false)
-            pdf.move_down 44
+            pdf.move_down 32
+            pdf.draw_text "По доверенности № ________ от ______________", at: [ 0, pdf.cursor ]
+            pdf.move_down 12
             pdf.draw_text "М.П.", at: [ 0, pdf.cursor ]
             pdf.draw_text "\"____\" ______________ 20____ года", at: [ 45, pdf.cursor ]
           end
@@ -612,6 +613,8 @@ class Pdf::DocumentsService
       pdf.draw_text label, at: [ 0, y ]
       pdf.draw_text position, at: [ pos_x, y ] if position.present?
       pdf.stroke_horizontal_line line_from, line_to, at: y - 2
+      name_width = [ pdf.width_of(name.to_s, size: 7), 78 ].max
+      pdf.stroke_horizontal_line name_x, name_x + name_width, at: y - 2
       pdf.draw_text name, at: [ name_x, y ] if name.present?
       pdf.font "DejaVu", size: 5 do
         pdf.draw_text "(должность)", at: [ pos_x, y - 9 ] if position_caption
