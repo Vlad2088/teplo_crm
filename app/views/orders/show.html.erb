@@ -319,7 +319,7 @@
               <td class="px-6 py-3.5 text-sm text-gray-900"><%= document.title %></td>
               <td class="px-6 py-3.5 text-sm text-gray-600 whitespace-nowrap"><%= l(document.document_date, format: :long) if document.document_date %></td>
               <td class="px-6 py-3.5 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
+                <div class="flex items-center justify-end gap-3">
                   <%= link_to "PDF", pdf_order_document_path(@order, document),
                       class: "px-2.5 py-1.5 text-xs font-medium rounded bg-orange-50 text-orange-600 hover:bg-orange-100 transition",
                       target: "_blank", rel: "noopener" %>
