@@ -261,11 +261,19 @@ class Pdf::DocumentsService
       value.to_s.gsub(/\.0$/, "")
     end
 
-    # Номер документа из заголовка («Счёт № 5» → «5»)
+    # Номер документа из поля «Название» («Счёт № 5» → «5»; «11», «НФ-15» → целиком)
     def doc_number
-      return "" unless document.title.to_s.include?("№")
+      title = document.title.to_s.strip
+      return "" if title.empty?
 
-      document.title.to_s.gsub(/^.*№\s*/, "").strip
+      part = if title.include?("№")
+               title.split("№", 2).last.to_s.strip.split(/\s+/).first.to_s
+      else
+               title
+      end
+      # Без «№» название считается номером, только если похоже на него:
+      # содержит цифру и без пробелов («11», «НФ-15», «5/У»).
+      part.match?(/\A\S*\d\S*\z/) ? part : ""
     end
 
     def number_part
@@ -600,7 +608,7 @@ class Pdf::DocumentsService
         pdf.font "DejaVu", size: 10
 
         # Шапка: номер и город/дата
-        pdf.text "ДОГОВОР ПОДРЯДА № #{doc_number}", align: :center, size: 13, style: :bold
+        pdf.text "ДОГОВОР ПОДРЯДА № #{doc_number.presence || "___"}", align: :center, size: 13, style: :bold
         pdf.move_down 2
         pdf.text "на выполнение работ по монтажу системы «Тёплый пол»", align: :center, size: 11
         pdf.move_down 8
@@ -743,7 +751,7 @@ class Pdf::DocumentsService
 
         client = order.client
 
-        pdf.text "Договор поставки оборудования № #{doc_number}", align: :center, size: 12, style: :bold
+        pdf.text "Договор поставки оборудования № #{doc_number.presence || "___"}", align: :center, size: 12, style: :bold
         pdf.move_down 8
         pdf.font "DejaVu", size: 9 do
           pdf.text "г. Петропавловск-Камчатский#{' ' * 40}#{l(doc_date)} г.", align: :center
