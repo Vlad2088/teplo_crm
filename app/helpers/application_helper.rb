@@ -23,6 +23,19 @@ module ApplicationHelper
     active ? "#{base} bg-orange-100 text-orange-700" : "#{base} bg-gray-100 text-gray-600 hover:bg-gray-200"
   end
 
+  # Русские названия категорий товаров
+  def category_name(category)
+    names = { "warm_floor" => "Тёплый пол", "thermostat" => "Терморегулятор", "underlay" => "Подложка", "other" => "Прочее" }
+    names[category] || category.to_s
+  end
+
+  # Класс для таба категории отчёта по товарам
+  def category_tab_class(current_category)
+    active = params[:category].blank? && current_category.nil? || params[:category] == current_category
+    base = "px-3.5 py-1.5 rounded-lg text-sm font-medium transition"
+    active ? "#{base} bg-orange-100 text-orange-700" : "#{base} bg-gray-100 text-gray-600 hover:bg-gray-200"
+  end
+
   def sidebar_link(label, path)
     is_active = request.path == path || request.path.start_with?("#{path}/")
     base_class = "block px-4 py-2 rounded-md text-sm font-medium transition"

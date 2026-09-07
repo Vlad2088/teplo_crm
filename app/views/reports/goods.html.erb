@@ -1,0 +1,124 @@
+<% content_for :title, "Отчёт по товарам" %>
+
+<div class="w-full">
+  <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Отчёт по товарам</h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Период: <%= l(@from) %> — <%= l(@to) %>
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <%= link_to "Месяц", reports_goods_path(period: "month", category: params[:category]), class: period_tab_class("month") %>
+      <%= link_to "Квартал", reports_goods_path(period: "quarter", category: params[:category]), class: period_tab_class("quarter") %>
+      <%= link_to "Год", reports_goods_path(period: "year", category: params[:category]), class: period_tab_class("year") %>
+      <%= link_to "Произвольный", reports_goods_path(period: "custom", from: params[:from], to: params[:to], category: params[:category]), class: period_tab_class("custom") %>
+    </div>
+  </div>
+
+  <% if params[:period] == "custom" %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+      <%= form_with url: reports_goods_path, method: :get, class: "flex flex-wrap items-end gap-3" do |f| %>
+        <%= f.label :from, "С", class: "text-sm text-gray-600" %>
+        <%= f.date_field :from, value: params[:from].presence || @from, class: "rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500" %>
+        <%= f.label :to, "По", class: "text-sm text-gray-600" %>
+        <%= f.date_field :to, value: params[:to].presence || @to, class: "rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500" %>
+        <%= f.select :category, options_for_select([["Все категории", nil]] + Product.categories.keys.map { |c| [t("categories.#{c}", default: c), c] }, params[:category]), {}, class: "rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500" %>
+        <%= hidden_field_tag :period, "custom" %>
+        <%= f.submit "Показать", class: "rounded-lg px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition shadow-sm cursor-pointer" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Карточки итогов -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      <p class="text-sm text-gray-500">Общая стоимость склада</p>
+      <p class="text-2xl font-bold text-gray-900 mt-1"><%= format_currency(@total_stock_value) %></p>
+      <p class="text-xs text-gray-400 mt-2">по цене закупа, все товары</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      <p class="text-sm text-gray-500">Товаров с движениями</p>
+      <p class="text-2xl font-bold text-gray-900 mt-1"><%= @rows.count %></p>
+      <p class="text-xs text-gray-400 mt-2">за выбранный период</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      <p class="text-sm text-gray-500">Товаров на складе всего</p>
+      <p class="text-2xl font-bold text-gray-900 mt-1"><%= Product.count %></p>
+      <p class="text-xs text-gray-400 mt-2">позиций в справочнике</p>
+    </div>
+  </div>
+
+  <!-- Фильтр по категории -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 flex flex-wrap items-center gap-2">
+    <span class="text-sm text-gray-600 mr-2">Категория:</span>
+    <%= link_to "Все", reports_goods_path(period: params[:period], from: params[:from], to: params[:to]), class: category_tab_class(nil) %>
+    <% Product.categories.keys.each do |c| %>
+      <%= link_to category_name(c), reports_goods_path(period: params[:period], from: params[:from], to: params[:to], category: c), class: category_tab_class(c) %>
+    <% end %>
+  </div>
+
+  <!-- Таблица по товарам -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-base font-semibold text-gray-900">Движение товаров за период</h2>
+    </div>
+    <% if @rows.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Товар</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Приход, шт</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Расход, шт</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Остаток</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Стоимость остатка</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            <% @rows.each do |row| %>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-3.5 whitespace-nowrap font-medium text-gray-900">
+                  <%= link_to row[:product].name, row[:product], class: "text-orange-600 hover:text-orange-700 hover:underline" %>
+                </td>
+                <td class="px-6 py-3.5 whitespace-nowrap"><%= product_category_badge(row[:product].category) %></td>
+                <td class="px-6 py-3.5 whitespace-nowrap text-right text-green-700 font-medium"><%= row[:in_qty] %></td>
+                <td class="px-6 py-3.5 whitespace-nowrap text-right text-red-700 font-medium"><%= row[:out_qty] %></td>
+                <td class="px-6 py-3.5 whitespace-nowrap text-right font-bold text-gray-900"><%= row[:ending_stock] %> <%= row[:product].unit %></td>
+                <td class="px-6 py-3.5 whitespace-nowrap text-right text-gray-900"><%= format_currency(row[:stock_value]) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-6 text-center text-gray-400 text-sm">Нет движений за период<%= " в категории «#{category_name(@category)}»" if @category %></div>
+    <% end %>
+  </div>
+
+  <!-- Топ расходуемых -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-base font-semibold text-gray-900">Топ-5 расходуемых</h2>
+    </div>
+    <% if @top_consumed.any? %>
+      <div class="p-6 space-y-3">
+        <% @top_consumed.each do |row| %>
+          <div>
+            <div class="flex justify-between items-center text-sm mb-1">
+              <span class="text-gray-600"><%= row[:product].name %></span>
+              <span class="font-medium text-gray-900"><%= row[:out_qty] %> <%= row[:product].unit %></span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+              <% max_out = @top_consumed.map { |r| r[:out_qty] }.max %>
+              <div class="bg-orange-500 h-2 rounded-full" style="width: <%= max_out.positive? ? (row[:out_qty] * 100 / max_out).round : 0 %>%"></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="p-6 text-center text-gray-400 text-sm">Нет списаний за период</div>
+    <% end %>
+  </div>
+</div>

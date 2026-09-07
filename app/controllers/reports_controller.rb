@@ -27,6 +27,43 @@ class ReportsController < ApplicationController
     @operations.sort_by! { |op| [ op[:date], op[:income] ? 1 : 0 ] }.reverse!
   end
 
+  # GET /reports/goods?period=month|quarter|year|custom&from=..&to=..&category=warm_floor
+  def goods
+    @from, @to = report_period
+    @category = params[:category].presence
+
+    products = @category.present? ? Product.where(category: @category).order(:name) : Product.all.order(:name)
+
+    movements = StockMovement.where(created_at: @from.beginning_of_day..@to.end_of_day)
+                             .where(product_id: products.ids)
+                             .includes(:product).to_a
+
+    # движения ПОСЛЕ конца периода — чтобы вычислить остаток на конец периода
+    after_by_product = StockMovement.where(created_at: @to.end_of_day..)
+                                    .where(product_id: products.ids)
+                                    .group(:product_id, :movement_type).sum(:quantity_change)
+
+    @rows = products.map do |product|
+      product_movements = movements.select { |m| m.product_id == product.id }
+      in_qty = product_movements.select(&:in?).sum(&:quantity_change)
+      out_qty = product_movements.select(&:out?).sum(&:quantity_change)
+      after_in = after_by_product[[ product.id, "in" ]].to_i
+      after_out = after_by_product[[ product.id, "out" ]].to_i
+      ending_stock = product.stock_quantity - (after_in - after_out)
+      {
+        product: product,
+        in_qty: in_qty,
+        out_qty: out_qty,
+        ending_stock: ending_stock,
+        stock_value: ending_stock * (product.purchase_price || 0)
+      }
+    end
+    @rows.select! { |row| row[:in_qty].positive? || row[:out_qty].positive? }
+
+    @total_stock_value = Product.all.sum { |p| p.stock_quantity * (p.purchase_price || 0) }
+    @top_consumed = @rows.reject { |row| row[:out_qty].zero? }.sort_by { |row| -row[:out_qty] }.first(5)
+  end
+
   private
 
   def report_period
