@@ -13,6 +13,8 @@ Rails.application.routes.draw do
     resources :order_items, only: %i[ create destroy ]
   end
   resources :stock_movements
+  resources :expense_categories
+  resources :expenses
   resource :company_setting, only: %i[ show edit update ]
 
   # Reveal health status on /up
