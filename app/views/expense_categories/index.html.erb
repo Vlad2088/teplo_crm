@@ -1,0 +1,49 @@
+<% content_for :title, "Статьи расходов" %>
+
+<div class="w-full">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Статьи расходов</h1>
+      <p class="text-sm text-gray-500 mt-1">Справочник: аренда, ГСМ, реклама, канцелярия и т.д.</p>
+    </div>
+    <%= link_to "Добавить статью", new_expense_category_path, class: "rounded-lg px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition shadow-sm" %>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <% if @expense_categories.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Расходов</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            <% @expense_categories.each do |category| %>
+              <tr id="<%= dom_id category %>" class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-3.5 whitespace-nowrap font-medium text-gray-900"><%= category.name %></td>
+                <td class="px-6 py-3.5 whitespace-nowrap text-gray-600 text-right"><%= category.expenses.count %></td>
+                <td class="px-6 py-3.5 whitespace-nowrap text-right">
+                  <div class="flex justify-end items-center gap-2">
+                    <%= link_to "Изменить", edit_expense_category_path(category), class: "px-2.5 py-1.5 text-xs font-medium rounded bg-orange-50 text-orange-600 hover:bg-orange-100 transition" %>
+                    <%= button_to "Удалить", category, method: :delete,
+                        class: "px-2.5 py-1.5 text-xs font-medium rounded bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer",
+                        data: { turbo_confirm: "Удалить статью расходов? Все связанные расходы тоже будут удалены." } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-12 text-center">
+        <p class="text-gray-400 text-lg mb-2">Нет статей расходов</p>
+        <p class="text-gray-400 text-sm">Добавьте статьи: «Аренда», «ГСМ», «Реклама», «Канцелярия»…</p>
+        <%= link_to "Добавить статью", new_expense_category_path, class: "mt-4 inline-block rounded-md px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium" %>
+      </div>
+    <% end %>
+  </div>
+</div>

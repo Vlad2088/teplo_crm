@@ -1,0 +1,10 @@
+<% content_for :title, "Новый расход" %>
+
+<div class="w-full">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Новый расход</h1>
+    <p class="text-sm text-gray-500 mt-1">Списание денежных средств на нужды компании</p>
+  </div>
+
+  <%= render "form", expense: @expense %>
+</div>

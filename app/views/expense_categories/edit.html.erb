@@ -1,0 +1,10 @@
+<% content_for :title, "Редактирование статьи расходов" %>
+
+<div class="w-full">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Редактирование статьи расходов</h1>
+    <p class="text-sm text-gray-500 mt-1"><%= @expense_category.name %></p>
+  </div>
+
+  <%= render "form", expense_category: @expense_category %>
+</div>

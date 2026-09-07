@@ -1,0 +1,58 @@
+<%= form_with(model: expense, class: "contents") do |form| %>
+  <% if expense.errors.any? %>
+    <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-5">
+      <h2 class="text-sm font-semibold mb-2"><%= ru_pluralize(expense.errors.count, "ошибка", "ошибки", "ошибок") %> при сохранении:</h2>
+      <ul class="list-disc ml-6 text-sm">
+        <% expense.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form_section("Данные расхода") do %>
+    <%= field_wrapper(form, :expense_category_id, "Статья расходов") do %>
+      <%= form.collection_select :expense_category_id, ExpenseCategory.order(:name), :id, :name,
+          { include_blank: "Выберите статью" },
+          class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500" %>
+      <p class="text-xs text-gray-400 mt-1">Справочник статей: <%= link_to "Статьи расходов", expense_categories_path, class: "text-orange-600 hover:underline" %></p>
+    <% end %>
+
+    <%= field_wrapper(form, :amount, "Сумма, ₽") do %>
+      <%= form.number_field :amount, step: 0.01, min: 0.01, required: true,
+          class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500" %>
+    <% end %>
+
+    <%= field_wrapper(form, :spent_on, "Дата") do %>
+      <%= form.date_field :spent_on, required: true,
+          class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500" %>
+    <% end %>
+
+    <%= field_wrapper(form, :payment_method, "Способ оплаты") do %>
+      <%= form.select :payment_method,
+          [[ "Наличные", "cash" ], [ "Безналичные", "cashless" ]],
+          { selected: expense.payment_method || "cash" },
+          class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500" %>
+    <% end %>
+
+    <%= field_wrapper(form, :comment, "Комментарий") do %>
+      <%= form.text_field :comment,
+          class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500" %>
+    <% end %>
+
+    <%= field_wrapper(form, :receipt, "Платёжный документ / чек") do %>
+      <%= form.file_field :receipt,
+          class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500 file:mr-3 file:rounded-md file:border-0 file:bg-orange-50 file:px-3 file:py-1.5 file:text-sm file:text-orange-600 hover:file:bg-orange-100 file:cursor-pointer" %>
+      <% if expense.receipt.attached? %>
+        <p class="text-xs text-gray-400 mt-1">
+          Прикреплён: <%= link_to expense.receipt.filename, rails_blob_path(expense.receipt, disposition: :attachment), class: "text-orange-600 hover:underline", target: :_blank, rel: "noopener" %>
+        </p>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <div class="flex items-center gap-3">
+    <%= form.submit "Сохранить", class: "rounded-lg px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition shadow-sm cursor-pointer" %>
+    <%= link_to "Отмена", expenses_path, class: "rounded-lg px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition" %>
+  </div>
+<% end %>
