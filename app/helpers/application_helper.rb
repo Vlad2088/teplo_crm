@@ -45,7 +45,9 @@ module ApplicationHelper
     "act" => "Акт",
     "contract" => "Договор",
     "upd" => "УПД",
-    "torg12" => "Накладная ТОРГ-12"
+    "torg12" => "Накладная ТОРГ-12",
+    "contract_work" => "Договор подряда",
+    "contract_supply" => "Договор поставки"
   }.freeze
 
   # Короткие подписи для бейджей в таблицах
@@ -55,7 +57,9 @@ module ApplicationHelper
     "act" => "Акт",
     "contract" => "Договор",
     "upd" => "УПД",
-    "torg12" => "ТОРГ-12"
+    "torg12" => "ТОРГ-12",
+    "contract_work" => "Подряд",
+    "contract_supply" => "Поставка"
   }.freeze
 
   PAYMENT_TYPE_NAMES = {
@@ -136,7 +140,7 @@ module ApplicationHelper
 
   # Бадж типа документа
   def doc_type_badge(doc_type)
-    colors = { "estimate" => "bg-indigo-100 text-indigo-700", "invoice" => "bg-blue-100 text-blue-700", "act" => "bg-green-100 text-green-700", "contract" => "bg-purple-100 text-purple-700", "upd" => "bg-teal-100 text-teal-700", "torg12" => "bg-amber-100 text-amber-700" }
+    colors = { "estimate" => "bg-indigo-100 text-indigo-700", "invoice" => "bg-blue-100 text-blue-700", "act" => "bg-green-100 text-green-700", "contract" => "bg-purple-100 text-purple-700", "upd" => "bg-teal-100 text-teal-700", "torg12" => "bg-amber-100 text-amber-700", "contract_work" => "bg-rose-100 text-rose-700", "contract_supply" => "bg-cyan-100 text-cyan-700" }
     tag.span DOC_TYPE_BADGE_NAMES[doc_type] || doc_type, class: "px-2 py-1 text-xs font-medium rounded-full #{colors[doc_type] || 'bg-gray-100 text-gray-600'}"
   end
 
