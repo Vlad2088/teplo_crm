@@ -1,0 +1,183 @@
+<% content_for :title, "Отчёт по деньгам" %>
+
+<div class="w-full">
+  <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Отчёт по деньгам</h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Период: <%= l(@from) %> — <%= l(@to) %>
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <%= link_to "Месяц", reports_money_path(period: "month"), class: period_tab_class("month") %>
+      <%= link_to "Квартал", reports_money_path(period: "quarter"), class: period_tab_class("quarter") %>
+      <%= link_to "Год", reports_money_path(period: "year"), class: period_tab_class("year") %>
+      <%= link_to "Произвольный", reports_money_path(period: "custom", from: params[:from], to: params[:to]), class: period_tab_class("custom") %>
+    </div>
+  </div>
+
+  <% if params[:period] == "custom" %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+      <%= form_with url: reports_money_path, method: :get, class: "flex flex-wrap items-end gap-3" do |f| %>
+        <%= f.label :from, "С", class: "text-sm text-gray-600" %>
+        <%= f.date_field :from, value: params[:from].presence || @from, class: "rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500" %>
+        <%= f.label :to, "По", class: "text-sm text-gray-600" %>
+        <%= f.date_field :to, value: params[:to].presence || @to, class: "rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:ring-orange-500" %>
+        <%= hidden_field_tag :period, "custom" %>
+        <%= f.submit "Показать", class: "rounded-lg px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition shadow-sm cursor-pointer" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Карточки итогов -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      <p class="text-sm text-gray-500">Поступления</p>
+      <p class="text-2xl font-bold text-green-600 mt-1"><%= format_currency(@income_total) %></p>
+      <p class="text-xs text-gray-400 mt-2"><%= ru_pluralize(@payments.count, "платёж", "платежа", "платежей") %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      <p class="text-sm text-gray-500">Расходы</p>
+      <p class="text-2xl font-bold text-red-600 mt-1"><%= format_currency(@expense_total) %></p>
+      <p class="text-xs text-gray-400 mt-2"><%= ru_pluralize(@expenses.count, "расход", "расхода", "расходов") %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      <p class="text-sm text-gray-500">Сальдо</p>
+      <p class="text-2xl font-bold mt-1 <%= @balance >= 0 ? "text-gray-900" : "text-red-600" %>"><%= format_currency(@balance) %></p>
+      <p class="text-xs text-gray-400 mt-2"><%= @balance >= 0 ? "Прибыльный период" : "Убыточный период" %></p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Разбивка поступлений по способу -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-base font-semibold text-gray-900">Поступления по способу</h2>
+      </div>
+      <div class="p-6 space-y-3">
+        <% if @income_total.positive? %>
+          <% { "Наличные" => @income_cash, "Безналичные" => @income_cashless }.each do |label, sum| %>
+            <div>
+              <div class="flex justify-between items-center text-sm mb-1">
+                <span class="text-gray-600"><%= label %></span>
+                <span class="font-medium text-gray-900"><%= format_currency(sum) %></span>
+                <span class="text-xs text-gray-400"><%= number_to_percentage(sum * 100 / @income_total, precision: 0) %></span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-2">
+                <div class="<%= label == "Наличные" ? "bg-green-500" : "bg-blue-500" %> h-2 rounded-full" style="width: <%= (sum * 100 / @income_total).round %>%"></div>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <p class="text-gray-400 text-sm">Нет поступлений за период</p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Разбивка расходов по статьям -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-base font-semibold text-gray-900">Расходы по статьям</h2>
+      </div>
+      <div class="p-6 space-y-3">
+        <% if @expense_by_category.any? %>
+          <% @expense_by_category.each do |category, sum| %>
+            <div>
+              <div class="flex justify-between items-center text-sm mb-1">
+                <span class="text-gray-600"><%= category.name %></span>
+                <span class="font-medium text-gray-900"><%= format_currency(sum) %></span>
+                <span class="text-xs text-gray-400"><%= number_to_percentage(@expense_total.positive? ? sum * 100 / @expense_total : 0, precision: 0) %></span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-2">
+                <div class="bg-red-400 h-2 rounded-full" style="width: <%= @expense_total.positive? ? (sum * 100 / @expense_total).round : 0 %>%"></div>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <p class="text-gray-400 text-sm">Нет расходов за период</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Детализация по заказам -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-base font-semibold text-gray-900">Поступления по заказам</h2>
+    </div>
+    <% if @payments_by_order.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Заказ</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Клиент</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Поступления</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            <% @payments_by_order.each do |order, sum| %>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-3.5 whitespace-nowrap">
+                  <%= link_to "##{order.id}", order, class: "text-orange-600 hover:text-orange-700 hover:underline font-medium" %>
+                </td>
+                <td class="px-6 py-3.5 whitespace-nowrap text-gray-600"><%= order.client.display_name %></td>
+                <td class="px-6 py-3.5 whitespace-nowrap text-right font-medium text-gray-900"><%= format_currency(sum) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-6 text-center text-gray-400 text-sm">Нет поступлений за период</div>
+    <% end %>
+  </div>
+
+  <!-- Хронология операций -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-base font-semibold text-gray-900">Хронология операций</h2>
+    </div>
+    <% if @operations.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Описание</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            <% @operations.each do |op| %>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-3.5 whitespace-nowrap text-gray-600"><%= l(op[:date]) %></td>
+                <td class="px-6 py-3.5 whitespace-nowrap">
+                  <% if op[:income] %>
+                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700">Поступление</span>
+                  <% else %>
+                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-50 text-red-700">Расход</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-3.5 text-gray-600">
+                  <%= op[:description] %>
+                  <% if op[:income] %>
+                    <span class="ml-2"><%= payment_type_badge(op[:badge_value]) %></span>
+                  <% else %>
+                    <span class="ml-2"><%= payment_method_badge(op[:badge_value]) %></span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-3.5 whitespace-nowrap text-right font-medium <%= op[:income] ? "text-green-600" : "text-red-600" %>">
+                  <%= op[:income] ? "+" : "−" %><%= format_currency(op[:amount]) %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-6 text-center text-gray-400 text-sm">Нет операций за период</div>
+    <% end %>
+  </div>
+</div>

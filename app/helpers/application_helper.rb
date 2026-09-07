@@ -16,6 +16,13 @@ module ApplicationHelper
     "#{count} #{form}"
   end
 
+  # Класс для таба периода отчёта (активный — оранжевый)
+  def period_tab_class(current_period)
+    active = (params[:period].blank? && current_period == "month") || (params[:period] == current_period)
+    base = "px-3.5 py-1.5 rounded-lg text-sm font-medium transition"
+    active ? "#{base} bg-orange-100 text-orange-700" : "#{base} bg-gray-100 text-gray-600 hover:bg-gray-200"
+  end
+
   def sidebar_link(label, path)
     is_active = request.path == path || request.path.start_with?("#{path}/")
     base_class = "block px-4 py-2 rounded-md text-sm font-medium transition"
