@@ -32,8 +32,9 @@
       </div>
     </nav>
 
-    <div class="flex min-h-[calc(100vh-4rem)]">
+    <div class="<%= user_signed_in? ? "flex min-h-[calc(100vh-4rem)]" : "flex items-center justify-center min-h-[calc(100vh-4rem)]" %>">
       <!-- Sidebar -->
+      <% if user_signed_in? %>
       <aside class="w-56 bg-white border-r border-gray-200 flex flex-col p-4">
         <nav class="flex-1 space-y-1">
           <%= sidebar_link "Заказы", orders_path %>
@@ -47,6 +48,7 @@
           TeploCRM v0.1
         </div>
       </aside>
+      <% end %>
 
       <!-- Main content -->
       <main class="flex-1 p-6">
