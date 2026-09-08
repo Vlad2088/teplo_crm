@@ -16,6 +16,26 @@ module ApplicationHelper
     "#{count} #{form}"
   end
 
+  # Класс для таба периода отчёта (активный — оранжевый)
+  def period_tab_class(current_period)
+    active = (params[:period].blank? && current_period == "month") || (params[:period] == current_period)
+    base = "px-3.5 py-1.5 rounded-lg text-sm font-medium transition"
+    active ? "#{base} bg-orange-100 text-orange-700" : "#{base} bg-gray-100 text-gray-600 hover:bg-gray-200"
+  end
+
+  # Русские названия категорий товаров
+  def category_name(category)
+    names = { "warm_floor" => "Тёплый пол", "thermostat" => "Терморегулятор", "underlay" => "Подложка", "other" => "Прочее" }
+    names[category] || category.to_s
+  end
+
+  # Класс для таба категории отчёта по товарам
+  def category_tab_class(current_category)
+    active = params[:category].blank? && current_category.nil? || params[:category] == current_category
+    base = "px-3.5 py-1.5 rounded-lg text-sm font-medium transition"
+    active ? "#{base} bg-orange-100 text-orange-700" : "#{base} bg-gray-100 text-gray-600 hover:bg-gray-200"
+  end
+
   def sidebar_link(label, path)
     is_active = request.path == path || request.path.start_with?("#{path}/")
     base_class = "block px-4 py-2 rounded-md text-sm font-medium transition"
@@ -60,6 +80,11 @@ module ApplicationHelper
     "torg12" => "ТОРГ-12",
     "contract_work" => "Подряд",
     "contract_supply" => "Поставка"
+  }.freeze
+
+  EXPENSE_PAYMENT_METHOD_NAMES = {
+    "cash" => "Наличные",
+    "cashless" => "Безналичные"
   }.freeze
 
   PAYMENT_TYPE_NAMES = {
@@ -145,6 +170,15 @@ module ApplicationHelper
   end
 
   # Бадж типа оплаты
+  def payment_method_badge(payment_method)
+    colors = {
+      "cash" => "bg-green-50 text-green-700",
+      "cashless" => "bg-blue-50 text-blue-700"
+    }
+    tag.span EXPENSE_PAYMENT_METHOD_NAMES[payment_method] || payment_method,
+        class: "px-2 py-1 text-xs font-medium rounded-full #{colors[payment_method] || 'bg-gray-100 text-gray-600'}"
+  end
+
   def payment_type_badge(payment_type)
     colors = { "cash" => "bg-green-100 text-green-700", "cashless" => "bg-blue-100 text-blue-700" }
     tag.span PAYMENT_TYPE_NAMES[payment_type] || payment_type, class: "px-2 py-1 text-xs font-medium rounded-full #{colors[payment_type] || 'bg-gray-100 text-gray-600'}"

@@ -1,0 +1,32 @@
+<tr id="<%= dom_id expense %>" class="hover:bg-gray-50 transition-colors">
+  <td class="px-6 py-3.5 whitespace-nowrap text-gray-600">
+    <%= l(expense.spent_on, format: :short) %>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap font-medium text-gray-900">
+    <%= expense.expense_category.name %>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap">
+    <%= payment_method_badge(expense.payment_method) %>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-right font-medium text-gray-900">
+    <%= format_currency(expense.amount) %>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap">
+    <% if expense.receipt.attached? %>
+      <%= link_to "Чек", rails_blob_path(expense.receipt, disposition: :attachment), class: "text-orange-600 hover:text-orange-700 hover:underline text-sm", target: :_blank, rel: "noopener" %>
+    <% else %>
+      <span class="text-gray-400">—</span>
+    <% end %>
+  </td>
+  <td class="px-6 py-3.5 text-gray-600 text-sm max-w-xs truncate" title="<%= expense.comment %>">
+    <%= expense.comment.presence || raw("&mdash;") %>
+  </td>
+  <td class="px-6 py-3.5 whitespace-nowrap text-right">
+    <div class="flex justify-end items-center gap-2">
+      <%= link_to "Изменить", edit_expense_path(expense), class: "px-2.5 py-1.5 text-xs font-medium rounded bg-orange-50 text-orange-600 hover:bg-orange-100 transition" %>
+      <%= button_to "Удалить", expense, method: :delete,
+          class: "px-2.5 py-1.5 text-xs font-medium rounded bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer",
+          data: { turbo_confirm: "Удалить расход?" } %>
+    </div>
+  </td>
+</tr>

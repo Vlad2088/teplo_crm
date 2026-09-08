@@ -1,0 +1,10 @@
+<% content_for :title, "Редактирование расхода" %>
+
+<div class="w-full">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Редактирование расхода</h1>
+    <p class="text-sm text-gray-500 mt-1"><%= l(@expense.spent_on, format: :short) %> · <%= format_currency(@expense.amount) %></p>
+  </div>
+
+  <%= render "form", expense: @expense %>
+</div>

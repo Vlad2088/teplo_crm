@@ -1,0 +1,45 @@
+<% content_for :title, "Расходы" %>
+
+<div class="w-full">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Расходы</h1>
+      <p class="text-sm text-gray-500 mt-1">
+        <%= ru_pluralize(@expenses.count, "запись", "записи", "записей") %><% if @expenses.any? %> · Итого: <span class="font-medium text-gray-700"><%= format_currency(@total) %></span><% end %>
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <%= link_to "Статьи расходов", expense_categories_path, class: "rounded-lg px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition" %>
+      <%= link_to "Добавить расход", new_expense_path, class: "rounded-lg px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition shadow-sm" %>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <% if @expenses.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статья</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Способ оплаты</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Чек</th>
+              <th class="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Комментарий</th>
+              <th class="px-6 py-3.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            <%= render @expenses %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-12 text-center">
+        <p class="text-gray-400 text-lg mb-2">Нет расходов</p>
+        <p class="text-gray-400 text-sm">Добавьте первый расход, чтобы вести учёт затрат компании</p>
+        <%= link_to "Добавить расход", new_expense_path, class: "mt-4 inline-block rounded-md px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium" %>
+      </div>
+    <% end %>
+  </div>
+</div>

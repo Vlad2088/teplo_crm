@@ -13,6 +13,10 @@ Rails.application.routes.draw do
     resources :order_items, only: %i[ create destroy ]
   end
   resources :stock_movements
+  resources :expense_categories
+  resources :expenses
+  get "reports/money", to: "reports#money", as: :reports_money
+  get "reports/goods", to: "reports#goods", as: :reports_goods
   resource :company_setting, only: %i[ show edit update ]
 
   # Reveal health status on /up
