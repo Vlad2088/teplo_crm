@@ -1,0 +1,52 @@
+<% content_for :title, "Организации" %>
+
+<div class="w-full max-w-5xl">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Организации</h1>
+      <p class="text-sm text-gray-500 mt-1">Реквизиты для печатных форм: смета, акт, счёт, договоры</p>
+    </div>
+    <%= link_to "Добавить организацию", new_organization_path, class: "px-6 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition cursor-pointer shadow-sm" %>
+  </div>
+
+  <% if notice.present? %>
+    <p class="py-2 px-3 bg-green-50 mb-5 text-green-700 font-medium rounded-md inline-block"><%= notice %></p>
+  <% end %>
+  <% if alert.present? %>
+    <p class="py-2 px-3 bg-red-50 mb-5 text-red-700 font-medium rounded-md inline-block"><%= alert %></p>
+  <% end %>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <table class="w-full text-left">
+      <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+        <tr>
+          <th class="px-4 py-3">Наименование</th>
+          <th class="px-4 py-3">Статус</th>
+          <th class="px-4 py-3">ИНН</th>
+          <th class="px-4 py-3">Телефон</th>
+          <th class="px-4 py-3 text-right">Действия</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 text-sm text-gray-900">
+        <% @organizations.each do |organization| %>
+          <tr>
+            <td class="px-4 py-3 font-medium">
+              <%= organization.name %>
+              <% if organization.id == @organizations.first.id %>
+                <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-700">по умолчанию</span>
+              <% end %>
+            </td>
+            <td class="px-4 py-3"><%= organization.individual_enterpreneur? ? "ИП" : "Юрлицо" %></td>
+            <td class="px-4 py-3"><%= organization.inn.presence || "—" %></td>
+            <td class="px-4 py-3"><%= organization.phone.presence || "—" %></td>
+            <td class="px-4 py-3 text-right space-x-3 whitespace-nowrap">
+              <%= link_to "Редактировать", edit_organization_path(organization), class: "text-orange-600 hover:text-orange-500 font-medium" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="text-sm text-gray-500 mt-4">Первая организация в списке подставляется в новые заказы автоматически. Удаление организации с заказами запрещено.</p>
+</div>

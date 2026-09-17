@@ -17,7 +17,7 @@ Rails.application.routes.draw do
   resources :expenses
   get "reports/money", to: "reports#money", as: :reports_money
   get "reports/goods", to: "reports#goods", as: :reports_goods
-  resource :company_setting, only: %i[ show edit update ]
+  resources :organizations
 
   # Reveal health status on /up
   get "up" => "rails/health#show", as: :rails_health_check

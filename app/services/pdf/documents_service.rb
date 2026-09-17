@@ -9,7 +9,7 @@ class Pdf::DocumentsService
   def initialize(document)
     @document = document
     @order = document.order
-    @company = CompanySetting.current
+    @company = order.organization
   end
 
   def render

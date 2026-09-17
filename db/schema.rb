@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_080002) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_17_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,28 +73,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_080002) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "company_settings", force: :cascade do |t|
-    t.string "address"
-    t.string "bank_account"
-    t.string "bank_bik"
-    t.string "bank_corr_account"
-    t.string "bank_name"
-    t.integer "company_type", default: 0, null: false
-    t.datetime "created_at", null: false
-    t.string "director_name"
-    t.string "email"
-    t.string "inn"
-    t.string "kpp"
-    t.string "name", null: false
-    t.string "ogrn"
-    t.string "okpo"
-    t.string "okved"
-    t.string "phone"
-    t.string "position_title", default: "Индивидуальный предприниматель"
-    t.string "short_name"
-    t.datetime "updated_at", null: false
-  end
-
   create_table "documents", force: :cascade do |t|
     t.text "content"
     t.datetime "created_at", null: false
@@ -135,6 +113,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_080002) do
     t.string "item_type"
     t.bigint "order_id", null: false
     t.decimal "quantity"
+    t.boolean "stock_withdrawn", default: false, null: false
     t.decimal "total_price"
     t.decimal "unit_price"
     t.datetime "updated_at", null: false
@@ -149,12 +128,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_080002) do
     t.decimal "discount_percent", precision: 5, scale: 2, default: "0.0", null: false
     t.date "measurement_date"
     t.text "notes"
+    t.bigint "organization_id", null: false
     t.integer "status"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["client_id"], name: "index_orders_on_client_id"
+    t.index ["organization_id"], name: "index_orders_on_organization_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
     t.check_constraint "discount_percent >= 0::numeric AND discount_percent <= 100::numeric", name: "orders_discount_percent_range"
+  end
+
+  create_table "organizations", force: :cascade do |t|
+    t.string "address"
+    t.string "bank_account"
+    t.string "bank_bik"
+    t.string "bank_corr_account"
+    t.string "bank_name"
+    t.integer "company_type", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.string "director_name"
+    t.string "email"
+    t.string "inn"
+    t.string "kpp"
+    t.string "name", null: false
+    t.string "ogrn"
+    t.string "okpo"
+    t.string "okved"
+    t.string "phone"
+    t.string "position_title", default: "Индивидуальный предприниматель"
+    t.string "short_name"
+    t.datetime "updated_at", null: false
   end
 
   create_table "payments", force: :cascade do |t|
@@ -219,6 +222,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_080002) do
   add_foreign_key "expenses", "users"
   add_foreign_key "order_items", "orders"
   add_foreign_key "orders", "clients"
+  add_foreign_key "orders", "organizations"
   add_foreign_key "orders", "users"
   add_foreign_key "payments", "orders"
   add_foreign_key "stock_movements", "orders"

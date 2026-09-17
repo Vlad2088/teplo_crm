@@ -15,6 +15,7 @@ ru:
       payment: "Платёж"
       document: "Документ"
       order_item: "Позиция заказа"
+      organization: "Организация"
       stock_movement: "Движение по складу"
       user: "Пользователь"
     attributes:
@@ -33,6 +34,7 @@ ru:
         measurement_date: "Дата замера"
         notes: "Заметки"
         user: "Менеджер"
+        organization: "Организация"
       product:
         name: "Название"
         sku: "Артикул"
@@ -61,6 +63,24 @@ ru:
         quantity: "Кол-во"
         unit_price: "Цена за ед."
         total_price: "Итого"
+      organization:
+        name: "Наименование"
+        company_type: "Статус"
+        short_name: "Сокращённое наименование"
+        director_name: "ФИО руководителя"
+        position_title: "Должность руководителя"
+        inn: "ИНН"
+        kpp: "КПП"
+        ogrn: "ОГРНИП"
+        okpo: "ОКПО"
+        okved: "ОКВЭД"
+        phone: "Телефон"
+        email: "Email"
+        address: "Адрес"
+        bank_name: "Банк"
+        bank_bik: "БИК"
+        bank_account: "Расчётный счёт"
+        bank_corr_account: "Корр. счёт"
       stock_movement:
         product: "Товар"
         movement_type: "Тип движения"
@@ -100,6 +120,7 @@ ru:
     document: "документ"
     order_item: "позицию"
     stock_movement: "движение по складу"
+    organization: "организацию"
   errors:
     format: "%{attribute} %{message}"
     messages:
