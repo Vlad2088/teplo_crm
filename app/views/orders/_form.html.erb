@@ -18,6 +18,12 @@
             class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
       <% end %>
 
+      <%= field_wrapper form, :organization_id, "Организация *" do %>
+        <%= form.collection_select :organization_id, Organization.order(:id), :id, :name,
+            {},
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" %>
+      <% end %>
+
       <%= field_wrapper form, :status, "Статус *" do %>
         <%= form.select :status,
             order_status_options,

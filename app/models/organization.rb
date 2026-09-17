@@ -1,5 +1,7 @@
-class CompanySetting < ApplicationRecord
+class Organization < ApplicationRecord
   enum :company_type, { individual_enterpreneur: 0, legal_entity: 1 }
+
+  has_many :orders, dependent: :restrict_with_error
 
   validates :name, presence: true
   validates :inn, length: { is: 12 }, if: -> { individual_enterpreneur? && inn.present? }
@@ -8,9 +10,9 @@ class CompanySetting < ApplicationRecord
   validates :ogrn, length: { is: 13 }, if: -> { legal_entity? && ogrn.present? }
   validates :bank_bik, format: { with: /\A\d{9}\z/ }, if: -> { bank_bik.present? }
 
-  # Единственная запись настроек (создаётся при первом обращении)
-  def self.current
-    first || create!(name: "ИП — заполните реквизиты")
+  # Организация по умолчанию — первая в списке (решение пользователя: без флажка)
+  def self.default
+    order(:id).first
   end
 
   # Реквизиты для печатных форм
