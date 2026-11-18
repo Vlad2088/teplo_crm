@@ -72,4 +72,4 @@ end
 gem "dotenv-rails", "~> 3.2"
 
 # Pinned: 4.3.x binary silently exits on DLine VPS (no output, RC 0, no files)
-gem "tailwindcss-ruby", "~> 4.1.11", "< 4.2"
+gem "tailwindcss-ruby", "~> 4.3.4"
