@@ -35,6 +35,7 @@ class TasksController < ApplicationController
     @task.user = current_user
 
     if @task.save
+      TaskNotifier.task_created(@task)
       redirect_to tasks_path, notice: "Задача создана."
     else
       render :new, status: :unprocessable_content
@@ -53,6 +54,7 @@ class TasksController < ApplicationController
   # PATCH /tasks/1/complete
   def complete
     @task.update(status: :done, completed_at: Time.current)
+    TaskNotifier.task_completed(@task)
     redirect_back_or_tasks("Задача выполнена.")
   end
 
