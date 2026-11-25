@@ -4,7 +4,7 @@ class TasksController < ApplicationController
   # GET /tasks
   def index
     scope = params[:scope].in?(%w[done all]) ? params[:scope] : "open"
-    base = Task.order(priority: :desc, :due_date).includes(:user)
+    base = Task.order(priority: :desc, due_date: :asc).includes(:user)
     case scope
     when "done"
       @tasks = base.done.order(completed_at: :desc)
