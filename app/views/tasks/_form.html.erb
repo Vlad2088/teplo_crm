@@ -1,0 +1,45 @@
+<%= form_with model: task, class: "space-y-4" do |form| %>
+  <% if task.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-red-800"><%= ru_pluralize(task.errors.count, "ошибка", "ошибки", "ошибок") %>:</h3>
+      <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+        <% task.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+    <%= field_wrapper(form, :title, "Что сделать") do %>
+      <%= form.text_field :title, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+    <% end %>
+
+    <div class="grid grid-cols-2 gap-4">
+      <%= field_wrapper(form, :due_date, "Срок (до какой даты)") do %>
+        <%= form.date_field :due_date, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+      <% end %>
+
+      <%= field_wrapper(form, :priority, "Приоритет") do %>
+        <%= form.select :priority, Task.priorities.keys.map { |k| [Task::PRIORITY_BADGE[k][0], k] }, {}, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+      <% end %>
+    </div>
+
+    <%= field_wrapper(form, :comment, "Комментарий") do %>
+      <%= form.text_area :comment, rows: 3, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" %>
+    <% end %>
+
+    <%= field_wrapper(form, :attachment, "Файл (чек, документ)") do %>
+      <%= form.file_field :attachment, class: "block w-full text-sm text-gray-500 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-orange-50 file:text-orange-700 file:text-sm hover:file:bg-orange-100" %>
+      <% if task.attachment.attached? %>
+        <p class="mt-1 text-sm text-blue-600">
+          Прикреплён: <%= link_to File.basename(task.attachment.filename.to_s), rails_blob_path(task.attachment, disposition: "attachment"), class: "hover:underline" %>
+        </p>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.submit (task.persisted? ? "Сохранить изменения" : "Создать"), class: "px-6 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-orange-700" %>
+  </div>
+<% end %>

@@ -1,0 +1,48 @@
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Задачи</h1>
+    <%= link_to "Новая задача", new_task_path, class: "px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-orange-700" %>
+  </div>
+
+  <% if @scope == "open" %>
+    <% if @overdue.any? %>
+      <h2 class="text-sm font-semibold text-red-600 uppercase tracking-wide mb-2">Просроченные (<%= @overdue.size %>)</h2>
+      <%= render "task_list", tasks: @overdue %>
+    <% end %>
+
+    <% if @due_today.any? %>
+      <h2 class="text-sm font-semibold text-orange-600 uppercase tracking-wide mb-2 mt-6">На сегодня (<%= @due_today.size %>)</h2>
+      <%= render "task_list", tasks: @due_today %>
+    <% end %>
+
+    <% if @upcoming.any? %>
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 mt-6">Предстоящие (<%= @upcoming.size %>)</h2>
+      <%= render "task_list", tasks: @upcoming %>
+    <% end %>
+
+    <% if @no_date.any? %>
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 mt-6">Без срока (<%= @no_date.size %>)</h2>
+      <%= render "task_list", tasks: @no_date %>
+    <% end %>
+
+    <% if @overdue.none? && @due_today.none? && @upcoming.none? && @no_date.none? %>
+      <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+        Открытых задач нет. Отличная работа!
+      </div>
+    <% end %>
+  <% else %>
+    <%= render "task_list", tasks: @tasks %>
+    <% if @tasks.none? %>
+      <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">Список пуст.</div>
+    <% end %>
+  <% end %>
+
+  <div class="flex gap-2 mt-6 text-sm">
+    <% { "open" => "Открытые", "done" => "Выполненные", "all" => "Все" }.each do |key, label| %>
+      <% active = @scope == key %>
+      <%= link_to label, tasks_path(scope: key),
+            class: "px-3 py-1.5 rounded-md font-medium #{active ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}" %>
+    <% end %>
+    <span class="ml-auto self-center text-gray-500">Открытых: <%= @open_count %></span>
+  </div>
+</div>

@@ -43,6 +43,13 @@
           <%= sidebar_link "Услуги", services_path %>
           <%= sidebar_link "Склад", stock_movements_path %>
           <%= sidebar_link "Расходы", expenses_path %>
+          <%= link_to tasks_path, class: "block px-4 py-2 rounded-md text-sm font-medium transition text-gray-700 hover:bg-gray-100" do %>
+            <span class="flex items-center justify-between">
+              <span>Задачи</span>
+              <% tc = Task.open.count rescue 0 %>
+              <% if tc > 0 %><span class="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-700"><%= tc %></span><% end %>
+            </span>
+          <% end %>
           <%= sidebar_link "Отчёт по деньгам", reports_money_path %>
           <%= sidebar_link "Отчёт по товарам", reports_goods_path %>
           <%= sidebar_link "Организации", organizations_path %>

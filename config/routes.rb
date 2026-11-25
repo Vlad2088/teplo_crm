@@ -14,6 +14,19 @@ Rails.application.routes.draw do
   end
   resources :stock_movements
   resources :expense_categories
+  namespace :api do
+    resources :tasks, only: %i[create index] do
+      member do
+        patch :done
+      end
+    end
+  end
+  resources :tasks do
+    member do
+      patch :complete
+      patch :reopen
+    end
+  end
   resources :expenses
   get "reports/money", to: "reports#money", as: :reports_money
   get "reports/goods", to: "reports#goods", as: :reports_goods

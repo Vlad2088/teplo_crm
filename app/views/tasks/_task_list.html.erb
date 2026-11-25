@@ -1,0 +1,40 @@
+<div class="space-y-2">
+  <% tasks.each do |task| %>
+    <div class="bg-white rounded-lg shadow p-4 flex items-start gap-3">
+      <% if task.open? %>
+        <%= button_to complete_task_path(task), method: :patch, form: { class: "inline" }, class: "mt-0.5 w-5 h-5 rounded border-2 border-gray-300 hover:border-green-500 hover:bg-green-50 flex-shrink-0", title: "Выполнить", aria: { label: "Выполнить" } do %><% end %>
+      <% else %>
+        <%= button_to reopen_task_path(task), method: :patch, form: { class: "inline" }, class: "mt-0.5 w-5 h-5 rounded bg-green-500 hover:bg-green-600 flex-shrink-0 flex items-center justify-center", title: "Вернуть в работу", aria: { label: "Вернуть в работу" } do %><span class="text-white text-xs">✓</span><% end %>
+      <% end %>
+
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-medium text-gray-900 <%= 'line-through text-gray-400' if task.done? %>"><%= task.title %></span>
+          <% pr, cls = task.priority_badge %>
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium <%= cls %>"><%= pr %></span>
+          <% if task.due_date.present? %>
+            <% date_cls = task.overdue? ? "text-red-600 font-semibold" : (task.due_today? ? "text-orange-600 font-semibold" : "text-gray-500") %>
+            <span class="text-sm <%= date_cls %>">до <%= l(task.due_date, format: :short) %></span>
+          <% end %>
+        </div>
+        <% if task.comment.present? %>
+          <p class="text-sm text-gray-600 mt-1 whitespace-pre-line"><%= task.comment %></p>
+        <% end %>
+        <div class="text-xs text-gray-400 mt-1 flex items-center gap-3">
+          <span><%= task.user.email %></span>
+          <span>•</span>
+          <span><%= l(task.created_at.to_date, format: :short) %></span>
+          <% if task.attachment.attached? %>
+            <span>•</span>
+            <%= link_to "📎 #{File.basename(task.attachment.filename.to_s)}", rails_blob_path(task.attachment, disposition: "attachment"), class: "text-blue-600 hover:underline" %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <%= link_to "Изменить", edit_task_path(task), class: "text-sm text-gray-500 hover:text-gray-700" %>
+        <%= button_to "Удалить", task_path(task), method: :delete, form: { class: "inline" }, class: "text-sm text-red-500 hover:text-red-700" %>
+      </div>
+    </div>
+  <% end %>
+</div>
