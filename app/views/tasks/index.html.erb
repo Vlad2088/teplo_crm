@@ -1,7 +1,16 @@
 <div class="max-w-4xl mx-auto">
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-bold text-gray-900">Задачи</h1>
     <%= link_to "Новая задача", new_task_path, class: "px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-orange-700" %>
+  </div>
+
+  <div class="flex gap-2 mb-6 text-sm">
+    <% { "open" => "Открытые", "done" => "Выполненные", "all" => "Все" }.each do |key, label| %>
+      <% active = @scope == key %>
+      <%= link_to label, tasks_path(scope: key),
+            class: "px-3 py-1.5 rounded-md font-medium #{active ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}" %>
+    <% end %>
+    <span class="ml-auto self-center text-gray-500">Открытых: <%= @open_count %></span>
   </div>
 
   <% if @scope == "open" %>
@@ -36,13 +45,4 @@
       <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">Список пуст.</div>
     <% end %>
   <% end %>
-
-  <div class="flex gap-2 mt-6 text-sm">
-    <% { "open" => "Открытые", "done" => "Выполненные", "all" => "Все" }.each do |key, label| %>
-      <% active = @scope == key %>
-      <%= link_to label, tasks_path(scope: key),
-            class: "px-3 py-1.5 rounded-md font-medium #{active ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}" %>
-    <% end %>
-    <span class="ml-auto self-center text-gray-500">Открытых: <%= @open_count %></span>
-  </div>
 </div>
