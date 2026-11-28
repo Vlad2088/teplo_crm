@@ -2,9 +2,9 @@
   <% tasks.each do |task| %>
     <div class="bg-white rounded-lg shadow p-4 flex items-start gap-3">
       <% if task.open? %>
-        <%= button_to complete_task_path(task), method: :patch, form: { class: "inline" }, class: "mt-0.5 w-5 h-5 rounded border-2 border-gray-300 hover:border-green-500 hover:bg-green-50 flex-shrink-0", title: "Выполнить", aria: { label: "Выполнить" } do %><% end %>
+        <%= button_to complete_task_path(task), method: :patch, form: { class: "inline" }, class: "mt-0.5 w-7 h-7 rounded-md border-2 border-gray-300 bg-white hover:border-green-500 hover:bg-green-50 hover:text-green-600 flex-shrink-0 flex items-center justify-center text-gray-300 text-sm font-bold", title: "Выполнить", aria: { label: "Выполнить" } do %>✓<% end %>
       <% else %>
-        <%= button_to reopen_task_path(task), method: :patch, form: { class: "inline" }, class: "mt-0.5 w-5 h-5 rounded bg-green-500 hover:bg-green-600 flex-shrink-0 flex items-center justify-center", title: "Вернуть в работу", aria: { label: "Вернуть в работу" } do %><span class="text-white text-xs">✓</span><% end %>
+        <%= button_to reopen_task_path(task), method: :patch, form: { class: "inline" }, class: "mt-0.5 w-7 h-7 rounded-md bg-green-500 hover:bg-green-600 flex-shrink-0 flex items-center justify-center text-white text-sm font-bold", title: "Вернуть в работу", aria: { label: "Вернуть в работу" } do %>✓<% end %>
       <% end %>
 
       <div class="flex-1 min-w-0">
